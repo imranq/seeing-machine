@@ -25,6 +25,7 @@ export function drawField(canvas, grid, cells, stim, seen, eyeCol) {
   const cx = w / 2, cy = h / 2;
   const k = size / (2 * R);
   g.clearRect(0, 0, w, h);
+  if (size < 8) return { cx, cy, k: 1 }; // chart not laid out (hidden panel)
   g.save();
   g.beginPath();
   g.arc(cx, cy, R * k, 0, Math.PI * 2);
