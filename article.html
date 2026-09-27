@@ -1,0 +1,1323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Seeing Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+:root{
+  --bg:#EDF0F2; --surface:#F8FAFB; --sunk:#E2E7EB; --ink:#111922; --ink-2:#3A4652; --muted:#66727E; --rule:#CAD2D9;
+  --accent:#6E3597; --accent-soft:#EDE3F4; --on-accent:#FFFFFF; --amber:#B97C06; --ray:#E0A21B;
+  --cone-s:#3F63D6; --cone-m:#1E7D4C; --cone-l:#E8743B; --rod:#7B3FA0;
+  --display:"Archivo", "Arial Narrow", Arial, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --gutter:clamp(16px, 4vw, 40px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0C1116; --surface:#141B22; --sunk:#0F151B; --ink:#E4E9EE; --ink-2:#B7C1CB; --muted:#8793A0; --rule:#27313B;
+    --accent:#B488DC; --accent-soft:#2A2136; --on-accent:#140C1C; --amber:#E3B23C; --ray:#F1C040;
+    --cone-s:#6384E8; --cone-m:#23875A; --cone-l:#D96F35; --rod:#A77AD6;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0C1116; --surface:#141B22; --sunk:#0F151B; --ink:#E4E9EE; --ink-2:#B7C1CB; --muted:#8793A0; --rule:#27313B;
+  --accent:#B488DC; --accent-soft:#2A2136; --on-accent:#140C1C; --amber:#E3B23C; --ray:#F1C040;
+  --cone-s:#6384E8; --cone-m:#23875A; --cone-l:#D96F35; --rod:#A77AD6;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding-inline:var(--gutter)}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+p{margin:0}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--mono)}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--rule)}
+.nav .wrap{display:flex;align-items:center;gap:20px;height:52px}
+.brand{font:800 15px/1 var(--display);font-variation-settings:"wdth" 125;letter-spacing:.08em;text-decoration:none;color:var(--ink);white-space:nowrap}
+.path{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;flex:1;align-items:center}
+.path::-webkit-scrollbar{display:none}
+.path a{font:500 12px/1 var(--mono);color:var(--muted);text-decoration:none;padding:8px 10px;border-radius:999px;white-space:nowrap}
+.path a:hover{color:var(--ink);background:var(--sunk)}
+.path a.on{color:var(--on-accent);background:var(--accent)}
+.path .arrow{color:var(--rule);font-size:11px}
+
+/* hero: a Snellen chart */
+.hero{padding-block:56px 40px;text-align:center}
+.chart{display:grid;grid-template-columns:64px 1fr 64px;row-gap:clamp(6px,1.4vw,14px);align-items:center;max-width:980px;margin:0 auto}
+.chart .row{font-family:var(--display);font-weight:760;font-variation-settings:"wdth" 108;letter-spacing:.14em;line-height:1;text-transform:uppercase;margin-right:-.14em}
+.chart .acuity{font:500 11px/1 var(--mono);color:var(--muted);text-align:left;font-variant-numeric:tabular-nums}
+.chart .lnum{font:500 11px/1 var(--mono);color:var(--muted);text-align:right}
+.r1{font-size:clamp(64px,16vw,176px)}
+.r2{font-size:clamp(36px,8.4vw,88px)}
+.r3{font-size:clamp(26px,5.9vw,62px);color:var(--accent)}
+.r4{font-size:clamp(13px,2.6vw,27px)}
+.r5{font-size:clamp(11px,1.9vw,20px)}
+.r6{font-size:clamp(9px,1.25vw,13px);letter-spacing:.08em!important}
+.chart .rule{grid-column:1/-1;height:0;border-top:2px solid var(--cone-l);opacity:.9;margin-block:4px}
+.hero-lede{max-width:62ch;margin:36px auto 0;font-size:18px;color:var(--ink-2);text-align:left}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px;justify-content:center}
+.btn{appearance:none;border:1px solid var(--rule);background:var(--surface);color:var(--ink);font:500 14px/1 var(--body);padding:11px 16px;border-radius:8px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--ink-2)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btn.small{padding:7px 11px;font-size:13px}
+.btn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* chapters */
+.chapter{padding-block:72px;border-top:1px solid var(--rule)}
+.chead{display:grid;grid-template-columns:88px 1fr;gap:8px 24px;margin-bottom:32px}
+.cnum{font:800 64px/0.9 var(--display);font-variation-settings:"wdth" 62;color:var(--accent)}
+.chead h2{font-size:clamp(30px,4.4vw,46px);font-weight:760;font-variation-settings:"wdth" 88;line-height:1.05;letter-spacing:-.01em}
+.chead .eyebrow{margin-bottom:10px}
+.chead .lede{grid-column:2;max-width:64ch;color:var(--ink-2);font-size:17px}
+@media (max-width:640px){.chead{grid-template-columns:1fr}.cnum{font-size:44px}.chead .lede{grid-column:1}}
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.35fr);gap:40px;align-items:start}
+.split.rev{grid-template-columns:minmax(0,1.35fr) minmax(0,1fr)}
+@media (max-width:880px){.split,.split.rev{grid-template-columns:1fr}}
+.prose{display:flex;flex-direction:column;gap:14px;max-width:62ch}
+.prose h3{font-size:20px;font-weight:700;font-variation-settings:"wdth" 100;margin-top:10px}
+.prose strong{font-weight:600}
+.fact{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;border-top:1px solid var(--rule);padding-top:14px;margin-top:6px}
+.fact dt{font:500 22px/1.1 var(--display);font-variation-settings:"wdth" 80;font-variant-numeric:tabular-nums;color:var(--ink)}
+.fact dd{margin:0;color:var(--muted);font-size:14px;align-self:center}
+
+.panel{background:var(--surface);border:1px solid var(--rule);border-radius:12px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.panel canvas{display:block;width:100%;border-radius:6px}
+.exp{border:1px dashed var(--accent);background:var(--accent-soft);border-radius:10px;padding:14px 16px;font-size:15px;display:flex;flex-direction:column;gap:6px}
+.exp .eyebrow{color:var(--accent)}
+.controls{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 20px}
+.ctl{display:flex;flex-direction:column;gap:6px}
+.ctl label, .lbl{font:500 12px/1.2 var(--mono);color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.ctl output{color:var(--ink);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.readout{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.readout div{background:var(--sunk);border-radius:8px;padding:10px 12px}
+.readout b{display:block;font:600 20px/1.2 var(--display);font-variation-settings:"wdth" 85;font-variant-numeric:tabular-nums}
+.readout span{font:500 11px/1.2 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.note{font-size:13px;color:var(--muted)}
+details.data{font-size:13px;color:var(--muted)}
+details.data summary{cursor:pointer;font-family:var(--mono)}
+details.data table{border-collapse:collapse;margin-top:8px;font-variant-numeric:tabular-nums}
+details.data td,details.data th{padding:3px 10px;border-bottom:1px solid var(--rule);text-align:right}
+.tblwrap{overflow-x:auto}
+
+/* optics */
+.duo{display:grid;grid-template-columns:1fr 1fr;border-radius:8px;overflow:hidden;font:700 26px/1 var(--display);letter-spacing:.12em;text-align:center}
+.duo div{padding:18px 6px;color:#0b0b0b}
+.duo .red{background:#D0302A}.duo .green{background:#2E9A48}
+.preview{display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center}
+.retview{height:120px;border-radius:8px;background:#F4F1E8;display:grid;place-items:center;overflow:hidden;border:1px solid var(--rule)}
+.retview span{font:800 60px/1 var(--display);color:#111;display:block}
+
+/* blind spot */
+.bs-wrap{background:#FAFAF7;border-radius:8px;border:1px solid var(--rule)}
+
+/* periphery */
+.crowd{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;font:500 28px/1 var(--mono);background:#FAFAF7;color:#111;border-radius:8px;padding:34px 8px;white-space:pre}
+.crowd .l{text-align:left}.crowd .r{text-align:right}.crowd .c{font-size:22px;color:#b0182a}
+
+/* colour */
+.mixrow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.patch{height:110px;border-radius:10px;border:1px solid var(--rule);display:flex;align-items:flex-end;padding:10px;font:500 12px/1.2 var(--mono);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6)}
+.bars{display:grid;grid-template-columns:22px 1fr 44px;gap:6px 8px;align-items:center;font:500 12px/1 var(--mono);color:var(--muted)}
+.bar{height:10px;border-radius:0 4px 4px 0;background:var(--sunk);position:relative;overflow:hidden}
+.bar i{position:absolute;inset:0 auto 0 0;border-radius:0 4px 4px 0}
+.match{font:600 15px/1.3 var(--body)}
+.match.ok{color:var(--cone-m)}
+svg text{font-family:var(--mono)}
+.chartbox{position:relative}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font:500 12px/1.4 var(--mono);padding:6px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .12s}
+.tip.on{opacity:1}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font:500 12px/1 var(--mono);color:var(--ink-2)}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:6px}
+
+/* adaptation / brain */
+.stare{position:relative;border-radius:8px;overflow:hidden;background:#808080}
+.stare canvas{border-radius:0}
+.fix{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#000;box-shadow:0 0 0 2px #fff}
+.count{position:absolute;right:10px;top:10px;font:600 13px/1 var(--mono);background:rgba(0,0,0,.6);color:#fff;padding:6px 9px;border-radius:6px;font-variant-numeric:tabular-nums}
+.troxler{position:relative;aspect-ratio:16/10;max-width:100%;border-radius:8px;overflow:hidden;background:#C9C9C9}
+.troxler i{position:absolute;width:22%;aspect-ratio:1;border-radius:50%;filter:blur(22px);transform:translate(-50%,-50%)}
+.troxler b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font:400 26px/1 var(--mono);color:#222}
+
+/* lab */
+.lab{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:20px;align-items:start}
+@media (max-width:960px){.lab{grid-template-columns:1fr}}
+.stage{position:relative;border-radius:10px;overflow:hidden;background:#000;touch-action:none;cursor:none}
+.stage canvas{display:block;width:100%;aspect-ratio:2/1;height:auto;border-radius:0}
+.gaze{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:2px solid rgba(255,255,255,.9);box-shadow:0 0 0 1px rgba(0,0,0,.5);pointer-events:none}
+.gaze::after{content:"";position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px;border-radius:50%;background:#fff}
+.stage-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:10px}
+.parts{display:flex;flex-direction:column;gap:16px}
+.pgroup{display:flex;flex-direction:column;gap:6px}
+.pgroup .eyebrow{margin-bottom:2px}
+.tog{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:center;padding:8px 10px;border-radius:8px;border:1px solid var(--rule);background:var(--surface);cursor:pointer;user-select:none}
+.tog:hover{border-color:var(--ink-2)}
+.tog input{margin:0;accent-color:var(--accent);width:16px;height:16px}
+.tog .n{font-weight:600;font-size:14px}
+.tog .s{grid-column:2;font-size:12px;color:var(--muted);line-height:1.35}
+.tog.off{background:var(--sunk);border-style:dashed}
+.tog.off .n{text-decoration:line-through;text-decoration-color:var(--accent);text-decoration-thickness:2px}
+.tog.dmg input{accent-color:var(--amber)}
+.explain{display:flex;flex-direction:column;gap:12px}
+.xcard{border-left:3px solid var(--accent);padding:2px 0 2px 14px}
+.xcard h4{margin:0 0 4px;font:700 16px/1.25 var(--display);font-variation-settings:"wdth" 95}
+.xcard p{font-size:14.5px;color:var(--ink-2)}
+.xcard .cond{font:500 11px/1.2 var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;display:block}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.fallback{padding:40px;color:#eee;text-align:center}
+
+footer{border-top:1px solid var(--rule);padding-block:40px 60px;color:var(--muted);font-size:14px}
+footer .wrap{display:flex;flex-direction:column;gap:10px;max-width:1120px}
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Chapters">
+  <div class="wrap">
+    <a class="brand" href="#top">SEEING&nbsp;MACHINE</a>
+    <div class="path" id="path">
+      <a href="#optics">Optics</a><span class="arrow">→</span>
+      <a href="#retina">Retina</a><span class="arrow">→</span>
+      <a href="#blindspot">Blind spot</a><span class="arrow">→</span>
+      <a href="#periphery">Periphery</a><span class="arrow">→</span>
+      <a href="#colour">Colour</a><span class="arrow">→</span>
+      <a href="#adaptation">Adaptation</a><span class="arrow">→</span>
+      <a href="#brain">Brain</a><span class="arrow">→</span>
+      <a href="#lab">The lab</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero wrap" id="top">
+  <div class="chart" aria-label="The Seeing Machine: an interactive tour of the human eye">
+    <span class="acuity">20/200</span><div class="row r1">The</div><span class="lnum">1</span>
+    <span class="acuity">20/100</span><div class="row r2">Seeing</div><span class="lnum">2</span>
+    <span class="acuity">20/70</span><div class="row r3">Machine</div><span class="lnum">3</span>
+    <span class="acuity">20/40</span><div class="row r4">An interactive tour of the human eye</div><span class="lnum">4</span>
+    <span class="acuity">20/30</span><div class="row r5">Eight experiments you run on yourself</div><span class="lnum">5</span>
+    <div class="rule" aria-hidden="true"></div>
+    <span class="acuity">20/20</span><div class="row r6">Your retina is brain tissue that grew out into your eye socket</div><span class="lnum">6</span>
+  </div>
+  <p class="hero-lede">Light takes about a tenth of a second to become a thought. On the way it is bent by a transparent window, squeezed through a hole, focused by a jelly lens, caught by about 97 million light-sensitive cells, compressed 100 to 1, and then rebuilt by your brain into something that feels like a seamless picture. This page follows that path, one stage at a time. Every chapter has something to try. At the end, you get to take the eye apart.</p>
+  <div class="hero-cta">
+    <a class="btn primary" href="#optics">Follow the light</a>
+    <a class="btn" href="#lab">Skip to the lab</a>
+  </div>
+</header>
+
+<main>
+
+<!-- 01 OPTICS -->
+<section class="chapter" id="optics">
+  <div class="wrap">
+    <div class="chead">
+      <div class="cnum">01</div>
+      <div><div class="eyebrow">Cornea · Iris · Lens</div><h2>A camera made of water and protein</h2></div>
+      <p class="lede">The front of the eye has one job: bend light so that everything from one point in the world lands on one point at the back. Get it wrong by a millimetre and the world goes soft.</p>
+    </div>
+    <div class="split rev">
+      <div class="panel">
+        <canvas id="opticsCanvas" height="360" aria-label="Cross-section of the eye with light rays from an object focusing onto the retina"></canvas>
+        <div class="controls">
+          <div class="ctl"><label for="objDist">Object distance <output id="objDistOut">∞</output></label><input id="objDist" type="range" min="0" max="100" value="100"></div>
+          <div class="ctl"><label for="age">Age <output id="ageOut">25 yrs</output></label><input id="age" type="range" min="8" max="70" value="25"></div>
+          <div class="ctl"><label for="pupil">Pupil diameter <output id="pupilOut">4.0 mm</output></label><input id="pupil" type="range" min="2" max="8" step="0.1" value="4"></div>
+          <div class="ctl"><span class="lbl">Eye shape</span>
+            <div class="seg" role="group" aria-label="Eye shape">
+              <button class="btn small" data-shape="normal" aria-pressed="true">Normal</button>
+              <button class="btn small" data-shape="myopic" aria-pressed="false">Too long (myopia)</button>
+              <button class="btn small" data-shape="hyperopic" aria-pressed="false">Too short (hyperopia)</button>
+            </div></div>
+        </div>
+        <div class="preview">
+          <div class="retview" aria-hidden="true"><span id="retLetter">E</span></div>
+          <div class="readout">
+            <div><span>Lens effort</span><b id="rAcc">0.0 D</b></div>
+            <div><span>Max available</span><b id="rAmp">11.0 D</b></div>
+            <div><span>Focus error</span><b id="rDef">0.0 D</b></div>
+            <div><span>Near point</span><b id="rNear">9 cm</b></div>
+          </div>
+        </div>
+        <p class="note">Simplified: the diagram lumps the cornea and lens into one bending surface and exaggerates distances inside the eye so the focus error is visible. The letter shows how blurry the image on the retina would be.</p>
+      </div>
+      <div class="prose">
+        <p><strong>The cornea does most of the work.</strong> The clear dome over your iris provides about 43 of your eye's roughly 60 dioptres of focusing power, because the jump from air into the watery cornea is where light bends most. That is why swimming underwater blurs everything: water cancels the cornea.</p>
+        <p><strong>The lens does the fine-tuning.</strong> A ring of muscle lets the lens bulge to focus up close. Drag the object toward the eye and watch the lens fatten. The extra power is called <em>accommodation</em>, measured in dioptres (1 ÷ distance in metres).</p>
+        <p><strong>The lens stiffens with age.</strong> A child can add about 15 dioptres, enough to focus 7 cm from their face. By 45 most people have 3 or 4 left, and by 60 almost none. Set the age to 55 and bring the object in to 25 cm: that is why reading glasses arrive in middle age. This is called presbyopia.</p>
+        <p><strong>The iris is an aperture.</strong> Your pupil ranges from about 2 mm in sunlight to 8 mm in the dark, a 16× change in light. A small pupil also narrows the cone of light, so a focus error makes a smaller blur. Shrink the pupil in the simulator. This is why squinting helps you read a distant sign.</p>
+        <div class="exp">
+          <span class="eyebrow">Experiment · the duochrome test</span>
+          <p>Your eye cannot focus all colours at once. Short wavelengths bend more than long ones, so green comes to focus slightly in front of red. Optometrists use this. Look at the letters below, with glasses if you normally wear them.</p>
+          <div class="duo" aria-hidden="true"><div class="red">ZHOE</div><div class="green">ZHOE</div></div>
+          <p>Red side sharper? Your focus lands a little in front of the retina, a slight lean toward myopia. Green sharper: a slight lean the other way. Equal: your focus is balanced.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 RETINA -->
+<section class="chapter" id="retina">
+  <div class="wrap">
+    <div class="chead">
+      <div class="cnum">02</div>
+      <div><div class="eyebrow">Photoreceptors</div><h2>Two cameras sharing one sensor</h2></div>
+      <p class="lede">The retina is a sheet about a quarter of a millimetre thick, lining the back of the eye. It holds two kinds of light catcher, arranged very unevenly.</p>
+    </div>
+    <div class="split">
+      <div class="prose">
+        <p><strong>Rods</strong> (about 92 million) are so sensitive they can respond to a single photon, but they only report brightness. They run your night vision. Their pigment, rhodopsin, is sometimes called visual purple, which is why rods are purple on this page.</p>
+        <p><strong>Cones</strong> (about 4.6 million) need much more light but come in three types, tuned to short, medium and long wavelengths. Comparing the three gives you colour. Cones also give you fine detail.</p>
+        <p>Almost all the cones crowd into the <strong>fovea</strong>, a pit about 1.5 mm across directly behind the lens. Its centre has no rods at all. Everywhere else, rods dominate. Hover the chart, or drag the slider, to see the mosaic at different distances from the centre of your gaze.</p>
+        <p><strong>The retina is built backwards.</strong> Light must pass through layers of nerve cells and blood vessels before it reaches the photoreceptors, which face away from the light. The wires have to leave somewhere, so they bundle together and exit through one hole: the optic disc. About 1.2 million nerve fibres carry the output of those 97 million receptors, so the retina has already compressed and processed the image before it leaves the eye.</p>
+        <dl class="fact">
+          <dt>~150,000</dt><dd>cones per mm² at the centre of the fovea</dd>
+          <dt>0</dt><dd>rods in the central 0.35 mm, the foveola</dd>
+          <dt>0</dt><dd>receptors of any kind at the optic disc</dd>
+        </dl>
+      </div>
+      <div class="panel">
+        <div class="legend"><span><i style="background:var(--cone-l)"></i>Cones</span><span><i style="background:var(--rod)"></i>Rods</span></div>
+        <div class="chartbox" id="densityBox">
+          <svg id="densitySvg" viewBox="0 0 640 280" width="100%" role="img" aria-label="Density of rods and cones across the retina, from 60 degrees temporal to 60 degrees nasal"></svg>
+          <div class="tip" id="densityTip"></div>
+        </div>
+        <div class="split" style="grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:18px;align-items:center">
+          <canvas id="mosaic" width="200" height="200" style="aspect-ratio:1;max-width:200px" aria-label="Simulated photoreceptor mosaic"></canvas>
+          <div class="ctl">
+            <label for="ecc">Distance from centre of gaze <output id="eccOut">0°</output></label>
+            <input id="ecc" type="range" min="0" max="40" step="0.5" value="0">
+            <p class="note" id="mosaicNote">Fovea: only cones, packed tight. Long (orange), medium (green) and short (blue) cones, with no short cones in the very centre.</p>
+          </div>
+        </div>
+        <details class="data"><summary>Data table</summary><div class="tblwrap" id="densityTable"></div></details>
+        <p class="note">Approximate values after Osterberg (1935) and Curcio et al. (1990), in thousands per mm². Mosaic is illustrative.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 BLIND SPOT -->
+<section class="chapter" id="blindspot">
+  <div class="wrap">
+    <div class="chead">
+      <div class="cnum">03</div>
+      <div><div class="eyebrow">The optic disc</div><h2>There is a hole in your vision right now</h2></div>
+      <p class="lede">Where the optic nerve leaves the eye there are no receptors, so each eye has a blind patch about 5° wide, around 15° to the side of wherever you look. That is about the size of a fist at arm's length. You have never noticed it.</p>
+    </div>
+    <div class="panel">
+      <div class="seg" role="group" aria-label="Blind spot target">
+        <button class="btn small" data-bs="dot" aria-pressed="true">Vanishing dot</button>
+        <button class="btn small" data-bs="line" aria-pressed="false">Broken line</button>
+        <button class="btn small" data-bs="pattern" aria-pressed="false">Missing patch</button>
+      </div>
+      <div class="bs-wrap"><canvas id="bsCanvas" height="220" aria-label="Blind spot test: a cross on the left and a target on the right"></canvas></div>
+      <div class="exp">
+        <span class="eyebrow">Experiment</span>
+        <p id="bsText">Cover or close your <strong>left</strong> eye. With your right eye, stare at the <strong>+</strong>. Don't look at the dot. Start about 50 cm from the screen and slowly lean in. At some distance the dot vanishes completely. It has landed on your optic disc.</p>
+      </div>
+      <p class="note">What replaces the dot is the interesting part. You don't see a black hole. You see the background colour, and in the other two tests your brain continues the line and the pattern across the gap. It is inventing what should be there from the surroundings. This is called filling-in.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 04 PERIPHERY -->
+<section class="chapter" id="periphery">
+  <div class="wrap">
+    <div class="chead">
+      <div class="cnum">04</div>
+      <div><div class="eyebrow">Acuity across the field</div><h2>Sharp vision is the size of your thumbnail</h2></div>
+      <p class="lede">Only the central 2° of your view, about a thumbnail at arm's length, is truly sharp. Your eyes make 3 or 4 jumps (saccades) every second to aim that tiny patch at whatever matters, and your brain stitches the results together.</p>
+    </div>
+    <div class="split">
+      <div class="panel">
+        <canvas id="anstis" width="420" height="420" style="aspect-ratio:1;max-width:420px;margin:0 auto;background:#FAFAF7" aria-label="Letters that grow larger with distance from a central dot"></canvas>
+        <div class="exp">
+          <span class="eyebrow">Experiment · the scaled chart</span>
+          <p>Stare at the centre dot. The letters get bigger the farther out they are, and at the right viewing distance they all look about equally readable. This chart (after Stuart Anstis, 1974) shows how steeply acuity falls: a letter 20° out must be roughly ten times larger than one near the centre.</p>
+        </div>
+      </div>
+      <div class="prose">
+        <h3>Crowding: seeing that something is there, not what it is</h3>
+        <p>Fix your gaze on the red <strong>+</strong> below. The single letter on the left is easy to name. The same letter on the right, squeezed between neighbours, becomes a jumble, even though it is exactly as far from the centre.</p>
+        <div class="crowd" aria-label="Crowding demo: a lone letter R on the left, and R between Z and K on the right"><span class="l">  R  </span><span class="c">+</span><span class="r"> ZRK </span></div>
+        <p>Your periphery is not just blurry. It pools features across a region, so nearby shapes merge. This is why you can't read a line of text out of the corner of your eye even when the letters are large.</p>
+        <p><strong>You also don't notice any of this.</strong> During each saccade your brain suppresses the smeared image, and it covers the gap with the view you land on. Try it in a mirror: look from one of your eyes to the other. You will never see your own eyes move, though someone watching you will.</p>
+        <dl class="fact">
+          <dt>2°</dt><dd>of the field is seen at full acuity</dd>
+          <dt>~50%</dt><dd>of primary visual cortex is devoted to roughly the central 10°</dd>
+          <dt>3–4 / s</dt><dd>saccades, each lasting 20 to 200 milliseconds</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 COLOUR -->
+<section class="chapter" id="colour">
+  <div class="wrap">
+    <div class="chead">
+      <div class="cnum">05</div>
+      <div><div class="eyebrow">Trichromacy</div><h2>Colour is three numbers</h2></div>
+      <p class="lede">A cone doesn't know which wavelength hit it. It only reports how strongly it responded. Your sense of colour comes from comparing three such reports, and that shortcut has strange consequences.</p>
+    </div>
+    <div class="split rev">
+      <div class="panel">
+        <div class="legend"><span><i style="background:var(--cone-s)"></i>S cone · short</span><span><i style="background:var(--cone-m)"></i>M cone · medium</span><span><i style="background:var(--cone-l)"></i>L cone · long</span></div>
+        <div class="chartbox" id="coneBox">
+          <svg id="coneSvg" viewBox="0 0 640 300" width="100%" role="img" aria-label="Relative sensitivity of short, medium and long cones from 380 to 700 nanometres"></svg>
+          <div class="tip" id="coneTip"></div>
+        </div>
+        <div class="ctl"><label for="wl">Single wavelength of light <output id="wlOut">580 nm</output></label><input id="wl" type="range" min="380" max="700" value="580"></div>
+        <div class="readout">
+          <div><span>S response</span><b id="wS">0.00</b></div>
+          <div><span>M response</span><b id="wM">0.00</b></div>
+          <div><span>L response</span><b id="wL">0.00</b></div>
+          <div style="display:flex;flex-direction:column;justify-content:space-between"><span>Looks like</span><b id="wSw" style="height:24px;border-radius:5px;margin-top:6px"></b></div>
+        </div>
+        <details class="data"><summary>Data table</summary><div class="tblwrap" id="coneTable"></div></details>
+        <p class="note">Curves are smoothed approximations of human cone sensitivities, each scaled to a peak of 1.</p>
+      </div>
+      <div class="prose">
+        <p>Look at how much the M and L curves overlap. They evolved from one gene that duplicated in our primate ancestors around 30 to 40 million years ago. Most mammals, including dogs, have only two cone types.</p>
+        <p>The genes for M and L sit on the X chromosome. If one is missing or shifted, the red–green comparison breaks. About <strong>1 in 12 men</strong> and 1 in 200 women of Northern European descent have some form of red–green colour deficiency. You can simulate it in the lab below.</p>
+        <div class="exp">
+          <span class="eyebrow">Experiment · make yellow without yellow</span>
+          <p>The left patch is pure 580 nm light. Mix the two lights on the right, 630 nm red and 540 nm green, until your cones can't tell them apart. Watch the bars: when all three match, the two lights are identical to you, even though they are physically nothing alike. Such pairs are called metamers.</p>
+          <div class="mixrow">
+            <div class="patch" id="patchT">580 nm alone</div>
+            <div class="patch" id="patchM">630 + 540 nm mix</div>
+          </div>
+          <div class="controls">
+            <div class="ctl"><label for="mixR">630 nm red light <output id="mixROut">40</output></label><input id="mixR" type="range" min="0" max="150" value="40"></div>
+            <div class="ctl"><label for="mixG">540 nm green light <output id="mixGOut">90</output></label><input id="mixG" type="range" min="0" max="150" value="90"></div>
+          </div>
+          <div class="bars" id="mixBars"></div>
+          <p class="match" id="matchMsg"></p>
+        </div>
+        <p>This is how every screen works. There is no yellow light coming out of your display. The yellow patch above is red and green subpixels, tuned to produce the same three cone responses as real yellow light.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 ADAPTATION -->
+<section class="chapter" id="adaptation">
+  <div class="wrap">
+    <div class="chead">
+      <div class="cnum">06</div>
+      <div><div class="eyebrow">Opponent colours</div><h2>Tired cells paint in colour</h2></div>
+      <p class="lede">After the cones, the retina recodes colour into opposing pairs: red against green, blue against yellow, light against dark. Stare at one side of a pair long enough and the cells tire. Look away and the opposite side wins for a few seconds.</p>
+    </div>
+    <div class="split">
+      <div class="panel">
+        <div class="stare" id="stare">
+          <canvas id="afterCanvas" width="1024" height="512" style="aspect-ratio:2/1" aria-label="Colour-inverted photo for the afterimage experiment"></canvas>
+          <div class="fix" aria-hidden="true"></div>
+          <div class="count" id="afterCount" hidden>20</div>
+        </div>
+        <div class="stage-bar">
+          <button class="btn primary" id="afterGo">Start the 20-second stare</button>
+          <button class="btn" id="afterReset">Reset</button>
+        </div>
+      </div>
+      <div class="prose">
+        <div class="exp">
+          <span class="eyebrow">Experiment · colour from nowhere</span>
+          <p>The picture has had its colours flipped. Press start and hold your gaze on the black dot, without moving your eyes, until the timer ends. The image will switch to plain black and white. Keep staring at the dot.</p>
+        </div>
+        <p>For a few seconds you should see the scene in its correct colours: a blue sky, red apples, green leaves. None of that colour is on the screen. Your red–green and blue–yellow channels adapted to the flipped colours, and the grey image now reads as their opposites.</p>
+        <p>The same fatigue explains why a white page looks bluish after a spell under warm lamplight, and why the green spot hangs in front of you after a camera flash.</p>
+        <p>This opponent coding is also why no colour looks reddish-green or yellowish-blue, while reddish-yellow (orange) and bluish-red (purple) are easy to imagine. Red and green sit on opposite ends of one channel.</p>
+        <dl class="fact">
+          <dt>10¹⁰</dt><dd>range of light levels you can see in, from starlight to snow in sunshine</dd>
+          <dt>~30 min</dt><dd>for rods to fully adapt to darkness, after about 10 minutes for cones</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 07 BRAIN -->
+<section class="chapter" id="brain">
+  <div class="wrap">
+    <div class="chead">
+      <div class="cnum">07</div>
+      <div><div class="eyebrow">Visual cortex</div><h2>You see a best guess, not the light</h2></div>
+      <p class="lede">The brain doesn't measure the light reaching your eye. It works out what surfaces are out there and what they are probably like, and shows you that. Usually this helps. Sometimes it shows.</p>
+    </div>
+    <div class="split rev">
+      <div class="panel">
+        <canvas id="checker" width="480" height="420" style="aspect-ratio:480/420;max-width:480px;margin:0 auto" aria-label="Checkerboard with a shadow; squares A and B are the same grey"></canvas>
+        <div class="stage-bar">
+          <button class="btn" id="checkerBtn" aria-pressed="false">Hide everything except A and B</button>
+          <span class="note">After Edward Adelson, 1995</span>
+        </div>
+      </div>
+      <div class="prose">
+        <h3>The checker shadow</h3>
+        <p>Square A looks dark and square B looks light. They are exactly the same grey, pixel for pixel. Press the button to remove their surroundings.</p>
+        <p>Your brain knows B sits in a shadow, so it discounts the shadow and reports what the surface is probably made of: a light square in shade. It is answering "what colour is the paint?" rather than "how much light is this?". That is almost always the question you need answered.</p>
+        <h3>Fading into the background</h3>
+        <div class="troxler" aria-label="Soft coloured blobs around a central plus sign">
+          <i style="left:22%;top:30%;background:#E86A92"></i><i style="left:50%;top:18%;background:#5FB3E6"></i><i style="left:78%;top:32%;background:#F2C14E"></i>
+          <i style="left:24%;top:74%;background:#7DCB85"></i><i style="left:52%;top:84%;background:#B28CE0"></i><i style="left:79%;top:72%;background:#F28C5C"></i>
+          <b>+</b>
+        </div>
+        <p>Stare at the + and hold still. Within 20 seconds or so the soft blobs begin to fade into the grey. Unchanging input with no sharp edges is treated as uninteresting and dropped. This is Troxler fading, first described in 1804. Blink or move your eyes and they come back.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 LAB -->
+<section class="chapter" id="lab">
+  <div class="wrap">
+    <div class="chead">
+      <div class="cnum">08</div>
+      <div><div class="eyebrow">The lab</div><h2>Take the eye apart</h2></div>
+      <p class="lede">Remove any part of the system and see what that eye would see. The ring follows your pointer: that is where the eye is looking, so the fovea is aimed there. Each change here corresponds to a real condition, which is named in the notes.</p>
+    </div>
+    <div class="lab">
+      <div>
+        <div class="stage" id="stage">
+          <canvas id="labCanvas" aria-label="Simulated view of a market scene through the modified eye"></canvas>
+          <div class="gaze" id="gaze" aria-hidden="true"></div>
+        </div>
+        <div class="stage-bar">
+          <div class="ctl" style="flex:1;min-width:220px"><label for="light">Light level <output id="lightOut">Daylight</output></label><input id="light" type="range" min="0" max="100" value="100"></div>
+          <label class="btn small" for="upload" style="cursor:pointer">Use your own photo</label>
+          <input id="upload" type="file" accept="image/*" hidden>
+        </div>
+        <div class="stage-bar" style="justify-content:flex-start">
+          <span class="eyebrow">Presets</span>
+          <div class="presets">
+            <button class="btn small" data-preset="normal">Healthy eye</button>
+            <button class="btn small" data-preset="raw">Raw retina</button>
+            <button class="btn small" data-preset="deutan">Red–green deficiency</button>
+            <button class="btn small" data-preset="night">Moonlight walk</button>
+            <button class="btn small" data-preset="amd">Macular degeneration</button>
+            <button class="btn small" data-preset="monet">Old lens</button>
+          </div>
+        </div>
+        <div class="explain" id="explain" style="margin-top:22px" aria-live="polite"></div>
+      </div>
+      <div class="parts" id="parts"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>The Seeing Machine is an educational simulation. The visual effects are approximations meant to show the idea behind each condition, not medical depictions of any one person's sight. Colour-deficiency simulation uses the Machado, Oliveira and Fernandes (2009) model.</p>
+    <p>If anything here matches changes in your own vision, especially a new blind patch, wavy lines, or sudden flashes and floaters, see an eye doctor promptly.</p>
+  </div>
+</footer>
+
+<script>
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function fitCanvas(cv, h) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = cv.clientWidth || cv.parentElement.clientWidth;
+  const hh = h ?? cv.clientHeight;
+  cv.width = Math.round(w * dpr); cv.height = Math.round(hh * dpr);
+  const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return { x, w, h: hh };
+}
+const redrawers = [];
+const onTheme = () => redrawers.forEach(f => f());
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", onTheme);
+new MutationObserver(onTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+let resizeT; addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(onTheme, 120); });
+
+/* ---------- nav highlight ---------- */
+const navLinks = $$("#path a");
+const io = new IntersectionObserver(es => {
+  es.forEach(e => { if (e.isIntersecting) navLinks.forEach(a => a.classList.toggle("on", a.getAttribute("href") === "#" + e.target.id)); });
+}, { rootMargin: "-45% 0px -50% 0px" });
+$$("section.chapter").forEach(s => io.observe(s));
+
+/* ---------- 01 OPTICS ---------- */
+const optics = { shape: "normal" };
+const ampForAge = a => Math.max(0.3, 18.5 - 0.3 * a);
+function distFromSlider(v) { return v >= 100 ? Infinity : 0.07 * Math.pow(6 / 0.07, v / 99); }
+function fmtDist(d) { return d === Infinity ? "∞ (far away)" : d >= 1 ? d.toFixed(1) + " m" : Math.round(d * 100) + " cm"; }
+function drawOptics() {
+  const cv = $("#opticsCanvas");
+  const { x, w, h } = fitCanvas(cv, 360);
+  const ink = css("--ink"), muted = css("--muted"), rule = css("--rule"), ray = css("--ray"), acc = css("--accent"), surf = css("--surface");
+  const d = distFromSlider(+$("#objDist").value), age = +$("#age").value, pupil = +$("#pupil").value;
+  const Vret = { normal: 60, myopic: 57, hyperopic: 63 }[optics.shape];
+  const vergence = d === Infinity ? 0 : 1 / d;
+  const need = vergence + Vret - 60, amp = ampForAge(age);
+  const a = clamp(need, 0, amp);
+  const defocus = (60 + a - vergence) - Vret; // + means focus in front of retina
+  // readouts
+  $("#objDistOut").textContent = fmtDist(d);
+  $("#ageOut").textContent = age + " yrs";
+  $("#pupilOut").textContent = pupil.toFixed(1) + " mm";
+  $("#rAcc").textContent = a.toFixed(1) + " D";
+  $("#rAmp").textContent = amp.toFixed(1) + " D";
+  $("#rDef").textContent = (Math.abs(defocus) < 0.05 ? "0.0" : (defocus > 0 ? "+" : "−") + Math.abs(defocus).toFixed(1)) + " D";
+  const nearV = amp + 60 - Vret; // max vergence the eye can bring to focus
+  $("#rNear").textContent = nearV <= 0 ? "none" : (1 / nearV >= 1 ? (1 / nearV).toFixed(1) + " m" : Math.round(100 / nearV) + " cm");
+  const blurPx = pupil * Math.abs(defocus) * 0.45;
+  $("#retLetter").style.filter = `blur(${blurPx.toFixed(2)}px)`;
+
+  // geometry (scaled to width)
+  const S = Math.min(1, w / 760), ax = h / 2;
+  const planeX = w * 0.56, eyeFront = planeX - 34 * S;
+  const retX = planeX + 230 * S + { normal: 0, myopic: 22, hyperopic: -22 }[optics.shape] * S;
+  const eyeRx = (retX - eyeFront) / 2 + 6 * S, eyeCx = eyeFront + eyeRx - 6 * S, eyeRy = 130 * S;
+  x.clearRect(0, 0, w, h);
+  // axis
+  x.strokeStyle = rule; x.setLineDash([4, 5]); x.lineWidth = 1; x.beginPath(); x.moveTo(8, ax); x.lineTo(w - 8, ax); x.stroke(); x.setLineDash([]);
+  // eyeball (sclera)
+  x.fillStyle = surf; x.strokeStyle = muted; x.lineWidth = 1.5;
+  x.beginPath(); x.ellipse(eyeCx, ax, eyeRx, eyeRy, 0, 0, Math.PI * 2); x.fill(); x.stroke();
+  // retina (back arc, thick)
+  x.strokeStyle = css("--cone-l"); x.lineWidth = 5 * S + 1;
+  x.beginPath(); x.ellipse(eyeCx, ax, eyeRx - 3, eyeRy - 3, 0, -Math.PI * 0.42, Math.PI * 0.42); x.stroke();
+  // fovea dip
+  x.fillStyle = surf; x.beginPath(); x.arc(retX + 1, ax, 4 * S + 2, 0, Math.PI * 2); x.fill();
+  // optic nerve
+  x.fillStyle = muted;
+  const onY = ax + 34 * S;
+  x.beginPath(); x.moveTo(retX - 6, onY - 9 * S); x.lineTo(w - 6, onY - 14 * S + 10); x.lineTo(w - 6, onY + 16 * S + 10); x.lineTo(retX - 6, onY + 9 * S); x.closePath();
+  x.globalAlpha = 0.35; x.fill(); x.globalAlpha = 1;
+  // cornea bulge
+  x.strokeStyle = ink; x.lineWidth = 2;
+  x.beginPath(); x.ellipse(eyeFront + 16 * S, ax, 30 * S, 72 * S, 0, Math.PI * 0.6, Math.PI * 1.4); x.stroke();
+  // iris
+  const pupilHalf = pupil * 5.2 * S;
+  x.strokeStyle = acc; x.lineWidth = 5 * S + 1; x.lineCap = "round";
+  x.beginPath(); x.moveTo(planeX - 12 * S, ax - 70 * S); x.lineTo(planeX - 12 * S, ax - pupilHalf); x.moveTo(planeX - 12 * S, ax + pupilHalf); x.lineTo(planeX - 12 * S, ax + 70 * S); x.stroke(); x.lineCap = "butt";
+  // lens
+  const lrx = (12 + a * 1.3) * S;
+  x.fillStyle = "rgba(170,200,230,0.35)"; x.strokeStyle = ink; x.lineWidth = 1.5;
+  x.beginPath(); x.ellipse(planeX + 4 * S, ax, lrx, 54 * S, 0, 0, Math.PI * 2); x.fill(); x.stroke();
+
+  // object
+  const near = d === Infinity ? 0 : clamp(Math.log(6 / d) / Math.log(6 / 0.07), 0, 1);
+  const objX = lerp(40, eyeFront - 90 * S, near), objH = 44 * S;
+  x.strokeStyle = ink; x.fillStyle = ink; x.lineWidth = 2.5;
+  if (d !== Infinity) {
+    x.beginPath(); x.moveTo(objX, ax); x.lineTo(objX, ax - objH); x.stroke();
+    x.beginPath(); x.moveTo(objX - 6, ax - objH + 8); x.lineTo(objX, ax - objH); x.lineTo(objX + 6, ax - objH + 8); x.stroke();
+  } else {
+    x.font = `500 12px ${css("--mono")}`; x.fillStyle = muted; x.fillText("from a distant star →", 14, ax - 64 * S - 12);
+  }
+  // rays
+  const gain = 7 * S;
+  const imgX = clamp(retX - defocus * gain, planeX + 60 * S, retX + 150 * S);
+  const imgY = ax + (d === Infinity ? 16 * S : (14 + 26 * near) * S);
+  const lensYs = [ax - pupilHalf * 0.92, ax, ax + pupilHalf * 0.92];
+  x.strokeStyle = ray; x.lineWidth = 1.6;
+  const hits = [];
+  lensYs.forEach(ly => {
+    let sx, sy;
+    if (d === Infinity) { sx = 8; sy = ly - 16 * S * ((planeX - 8) / (imgX - planeX)); }
+    else { sx = objX; sy = ax - objH; }
+    x.beginPath(); x.moveTo(sx, sy); x.lineTo(planeX, ly);
+    const t = (retX - planeX) / (imgX - planeX);
+    const ey = ly + (imgY - ly) * t;
+    x.lineTo(retX, ey); x.stroke(); hits.push(ey);
+    if (imgX > retX) { x.save(); x.setLineDash([3, 4]); x.globalAlpha = 0.6; x.beginPath(); x.moveTo(retX, ey); x.lineTo(imgX, imgY); x.stroke(); x.restore(); }
+  });
+  // blur circle on retina
+  const lo = Math.min(...hits), hi = Math.max(...hits);
+  x.strokeStyle = ray; x.lineWidth = 7; x.lineCap = "round"; x.globalAlpha = 0.85;
+  x.beginPath(); x.moveTo(retX + 4, lo - 1); x.lineTo(retX + 4, hi + 1); x.stroke(); x.globalAlpha = 1; x.lineCap = "butt";
+  // focus marker
+  x.fillStyle = ray; x.beginPath(); x.arc(imgX, imgY, 3.5, 0, Math.PI * 2); x.fill();
+
+  // labels
+  x.font = `500 ${w < 520 ? 10 : 12}px ${css("--mono")}`; x.fillStyle = muted; x.strokeStyle = muted; x.lineWidth = 1;
+  const lab = (t, px, py, tx, ty, align = "left") => {
+    x.beginPath(); x.moveTo(px, py); x.lineTo(tx, ty); x.stroke();
+    x.textAlign = align; x.fillText(t, tx + (align === "left" ? 4 : -4), ty + 4);
+  };
+  lab("cornea", eyeFront - 12 * S, ax - 60 * S, eyeFront - 60 * S, ax - 112 * S, "right");
+  lab("iris", planeX - 12 * S, ax - 64 * S, planeX - 30 * S, ax - 142 * S, "right");
+  lab("lens", planeX + 4 * S, ax - 50 * S, planeX + 30 * S, ax - 142 * S);
+  lab("vitreous humour", eyeCx + 20 * S, ax - 84 * S, eyeCx + 70 * S, ax - 146 * S);
+  lab("retina", retX - 20 * S, ax - 100 * S, retX + 18 * S, ax - 128 * S);
+  lab("fovea", retX + 2, ax - 4, retX + 26 * S, ax - 34 * S);
+  lab("optic nerve", w - 40 * S, onY + 18 * S + 8, w - 60 * S, ax + 120 * S, "right");
+  const status = Math.abs(defocus) < 0.15 ? "in focus on the retina" : defocus > 0 ? "focus falls in front of the retina" : "focus falls behind the retina";
+  x.textAlign = "left"; x.fillStyle = ink; x.font = `600 13px ${css("--body")}`;
+  x.fillText(status, 12, h - 14);
+}
+$("#objDist").addEventListener("input", drawOptics);
+$("#age").addEventListener("input", drawOptics);
+$("#pupil").addEventListener("input", drawOptics);
+$$("[data-shape]").forEach(b => b.addEventListener("click", () => {
+  optics.shape = b.dataset.shape;
+  $$("[data-shape]").forEach(o => o.setAttribute("aria-pressed", o === b));
+  drawOptics();
+}));
+redrawers.push(drawOptics);
+
+/* ---------- 02 RETINA: density chart + mosaic ---------- */
+const densPts = [ // [deg (neg = temporal), cones k/mm², rods k/mm²]
+  [-60, 4, 70], [-40, 4, 105], [-30, 4.5, 135], [-20, 5, 158], [-15, 6, 150], [-10, 7, 130], [-5, 12, 95], [-2, 25, 50], [-1, 50, 22], [-0.5, 90, 5], [0, 150, 0],
+  [0.5, 90, 5], [1, 50, 22], [2, 25, 50], [5, 12, 95], [10, 7, 130], [12.5, 6.5, 138], [13, 0, 0], [18, 0, 0], [18.5, 6, 150], [20, 5, 158], [30, 4.5, 135], [40, 4, 105], [60, 4, 70]
+];
+function densAt(deg) {
+  if (deg >= 13 && deg <= 18) return [0, 0];
+  for (let i = 0; i < densPts.length - 1; i++) {
+    const [a, c1, r1] = densPts[i], [b, c2, r2] = densPts[i + 1];
+    if (deg >= a && deg <= b) { const t = (deg - a) / (b - a || 1); return [lerp(c1, c2, t), lerp(r1, r2, t)]; }
+  }
+  return [4, 70];
+}
+function drawDensity() {
+  const svg = $("#densitySvg"), W = 640, H = 280, m = { l: 48, r: 16, t: 16, b: 44 };
+  const X = d => m.l + (d + 60) / 120 * (W - m.l - m.r), Y = v => H - m.b - v / 180 * (H - m.t - m.b);
+  const ink = css("--ink"), muted = css("--muted"), rule = css("--rule"), cone = css("--cone-l"), rod = css("--rod"), surf = css("--surface");
+  let s = "";
+  [0, 50, 100, 150].forEach(v => { s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${rule}" stroke-width="1"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="${muted}">${v}k</text>`; });
+  [-60, -40, -20, 0, 20, 40, 60].forEach(d => { s += `<text x="${X(d)}" y="${H - m.b + 18}" text-anchor="middle" font-size="11" fill="${muted}">${Math.abs(d)}°</text>`; });
+  s += `<text x="${m.l}" y="${H - 6}" font-size="11" fill="${muted}">← temporal (toward temple)</text><text x="${W - m.r}" y="${H - 6}" text-anchor="end" font-size="11" fill="${muted}">nasal (toward nose) →</text>`;
+  s += `<rect x="${X(13)}" y="${m.t}" width="${X(18) - X(13)}" height="${H - m.t - m.b}" fill="${ink}" opacity="0.07"/><text x="${X(15.5)}" y="${m.t + 12}" text-anchor="middle" font-size="11" fill="${ink}">optic disc</text>`;
+  const path = k => { let p = ""; let pen = false; for (let d = -60; d <= 60; d += 0.25) { const v = densAt(d)[k]; const z = d > 13 && d < 18; if (z) { pen = false; continue; } p += (pen ? "L" : "M") + X(d).toFixed(1) + " " + Y(v).toFixed(1); pen = true; } return p; };
+  s += `<path d="${path(1)}" fill="none" stroke="${rod}" stroke-width="2" stroke-linejoin="round"/>`;
+  s += `<path d="${path(0)}" fill="none" stroke="${cone}" stroke-width="2" stroke-linejoin="round"/>`;
+  s += `<text x="${X(0) + 8}" y="${Y(150) + 4}" font-size="12" fill="${ink}">cones peak in the fovea</text>`;
+  s += `<text x="${X(-20)}" y="${Y(158) - 8}" text-anchor="middle" font-size="12" fill="${ink}">rods peak ~20° out</text>`;
+  s += `<line id="dCross" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="${ink}" stroke-width="1" opacity="0"/>`;
+  s += `<circle id="dDotC" r="4" fill="${cone}" stroke="${surf}" stroke-width="2" opacity="0"/><circle id="dDotR" r="4" fill="${rod}" stroke="${surf}" stroke-width="2" opacity="0"/>`;
+  s += `<rect id="dHit" x="${m.l}" y="0" width="${W - m.l - m.r}" height="${H}" fill="transparent" style="cursor:crosshair"/>`;
+  svg.innerHTML = s;
+  const tip = $("#densityTip"), hit = $("#dHit", svg);
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W;
+    const d = clamp(Math.round(((px - m.l) / (W - m.l - m.r) * 120 - 60) * 2) / 2, -60, 60);
+    const [c, rd] = densAt(d);
+    $("#dCross", svg).setAttribute("x1", X(d)); $("#dCross", svg).setAttribute("x2", X(d)); $("#dCross", svg).setAttribute("opacity", 0.4);
+    const dc = $("#dDotC", svg), dr = $("#dDotR", svg);
+    dc.setAttribute("cx", X(d)); dc.setAttribute("cy", Y(c)); dc.setAttribute("opacity", 1);
+    dr.setAttribute("cx", X(d)); dr.setAttribute("cy", Y(rd)); dr.setAttribute("opacity", 1);
+    tip.innerHTML = `${Math.abs(d)}° ${d < 0 ? "temporal" : d > 0 ? "nasal" : "(fovea)"}<br>cones ${c.toFixed(1)}k · rods ${rd.toFixed(0)}k per mm²`;
+    tip.style.left = (X(d) / W * r.width) + "px"; tip.style.top = (Math.min(Y(c), Y(rd)) / H * r.height) + "px"; tip.classList.add("on");
+    const e = Math.abs(d); if (!(d >= 13 && d <= 18) && e <= 40) { $("#ecc").value = e; drawMosaic(d); }
+    else if (d >= 13 && d <= 18) drawMosaic(15.5);
+  };
+  hit.addEventListener("pointermove", move);
+  hit.addEventListener("pointerdown", move);
+  hit.addEventListener("pointerleave", () => { tip.classList.remove("on"); ["#dCross", "#dDotC", "#dDotR"].forEach(q => $(q, svg).setAttribute("opacity", 0)); });
+  // table
+  $("#densityTable").innerHTML = `<table><tr><th>Eccentricity</th><th>Cones (k/mm²)</th><th>Rods (k/mm²)</th></tr>` +
+    [-40, -20, -10, -5, -2, 0, 2, 5, 10, 15, 20, 40].map(d => { const [c, rd] = densAt(d); return `<tr><td>${d}°</td><td>${c.toFixed(1)}</td><td>${rd.toFixed(0)}</td></tr>`; }).join("") + `</table>`;
+}
+function drawMosaic(deg) {
+  const cv = $("#mosaic"), size = 200, dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = size * dpr; cv.height = size * dpr; const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const e = Math.abs(deg);
+  $("#eccOut").textContent = (deg >= 13 && deg <= 18) ? "optic disc" : e + "°";
+  const [c, rd] = densAt(deg >= 13 && deg <= 18 ? 15.5 : e);
+  x.fillStyle = "#1A1420"; x.fillRect(0, 0, size, size);
+  const note = $("#mosaicNote");
+  if (c + rd === 0) { x.fillStyle = "#E8D7C0"; x.fillRect(0, 0, size, size); note.textContent = "The optic disc: nerve fibres and blood vessels, no receptors at all. This is your blind spot."; return; }
+  const total = (c + rd) * 7.5, m = Math.ceil(Math.sqrt(total)), cell = size / m, coneFrac = c / (c + rd);
+  const R = rng(Math.round(e * 10) + 3);
+  const cols = [css("--cone-l"), css("--cone-m"), css("--cone-s")], rodC = css("--rod");
+  const cones = [];
+  for (let i = 0; i < m; i++) for (let j = 0; j < m; j++) {
+    const px = (i + 0.5 + (R() - 0.5) * 0.5) * cell, py = (j + 0.5 + (R() - 0.5) * 0.5) * cell;
+    if (R() < coneFrac) cones.push([px, py]);
+    else { x.fillStyle = rodC; x.beginPath(); x.arc(px, py, cell * 0.36, 0, 7); x.fill(); }
+  }
+  const cr = cell * 0.46 * (1 + 1.3 * (1 - coneFrac));
+  cones.forEach(([px, py]) => {
+    const q = R(); const sOk = e > 0.4;
+    x.fillStyle = sOk && q < 0.07 ? cols[2] : q < 0.62 ? cols[0] : cols[1];
+    x.beginPath(); x.arc(px, py, cr, 0, 7); x.fill();
+    x.strokeStyle = "#1A1420"; x.lineWidth = 1; x.stroke();
+  });
+  note.textContent = e < 1 ? "Fovea: only cones, packed tight. Long (orange), medium (green) and short (blue) cones, with no short cones in the very centre."
+    : e < 6 ? "Just outside the fovea: rods start filling the gaps and cones spread apart."
+    : "Periphery: a sea of rods with larger, sparse cones. Great for dim light and motion, poor for detail and colour.";
+}
+$("#ecc").addEventListener("input", e => drawMosaic(+e.target.value));
+redrawers.push(() => { drawDensity(); drawMosaic(+$("#ecc").value); });
+
+/* ---------- 03 BLIND SPOT ---------- */
+let bsMode = "dot";
+const bsCopy = {
+  dot: "Cover or close your <strong>left</strong> eye. With your right eye, stare at the <strong>+</strong>. Don't look at the dot. Start about 50 cm from the screen and slowly lean in. At some distance the dot vanishes completely. It has landed on your optic disc.",
+  line: "Same setup: left eye closed, right eye on the <strong>+</strong>. The line has a gap in it. Lean in until the gap lands on your blind spot. The line looks unbroken, because your brain continues it straight through.",
+  pattern: "Left eye closed, right eye on the <strong>+</strong>. There is a solid grey patch in the stripes. When it falls in your blind spot, the stripes seem to run straight through it. The brain fills the hole with the surrounding texture."
+};
+function drawBlind() {
+  const cv = $("#bsCanvas"); const { x, w, h } = fitCanvas(cv, 220);
+  const cx = 50, spacing = clamp(w - 130, 180, 440), tx = cx + spacing, cy = h / 2;
+  x.fillStyle = "#FAFAF7"; x.fillRect(0, 0, w, h);
+  if (bsMode === "pattern") {
+    for (let y = 0; y < h; y += 12) { x.fillStyle = (y / 12) % 2 ? "#FAFAF7" : "#2F3A8F"; x.fillRect(cx + 40, y, w - cx - 40, 12); }
+    x.fillStyle = "#9A9A9A"; x.fillRect(tx - 22, cy - 22, 44, 44);
+  }
+  if (bsMode === "line") {
+    x.fillStyle = "#111"; x.fillRect(cx + 30, cy - 4, tx - cx - 30 - 20, 8); x.fillRect(tx + 20, cy - 4, w - tx - 30, 8);
+  }
+  if (bsMode === "dot") { x.fillStyle = "#111"; x.beginPath(); x.arc(tx, cy, 16, 0, 7); x.fill(); }
+  x.fillStyle = "#FAFAF7"; x.fillRect(cx - 24, cy - 24, 48, 48);
+  x.fillStyle = "#111"; x.font = `500 38px ${css("--mono")}`; x.textAlign = "center"; x.textBaseline = "middle"; x.fillText("+", cx, cy + 2);
+}
+$$("[data-bs]").forEach(b => b.addEventListener("click", () => {
+  bsMode = b.dataset.bs; $$("[data-bs]").forEach(o => o.setAttribute("aria-pressed", o === b));
+  $("#bsText").innerHTML = bsCopy[bsMode]; drawBlind();
+}));
+redrawers.push(drawBlind);
+
+/* ---------- 04 PERIPHERY: Anstis chart ---------- */
+function drawAnstis() {
+  const cv = $("#anstis"), size = cv.clientWidth || 420, dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = size * dpr; cv.height = size * dpr; const x = cv.getContext("2d"); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  x.fillStyle = "#FAFAF7"; x.fillRect(0, 0, size, size);
+  const c = size / 2, R = rng(11), letters = "ABCDEFHKLNOPRSTUVZ";
+  x.fillStyle = "#111"; x.textAlign = "center"; x.textBaseline = "middle";
+  let r = size * 0.05;
+  for (let ring = 0; ring < 7 && r < c * 0.95; ring++) {
+    const fs = 5 + r * 0.16;
+    const n = Math.max(6, Math.floor(2 * Math.PI * r / (fs * 1.6)));
+    const off = R() * Math.PI;
+    x.font = `700 ${fs}px Arial, sans-serif`;
+    for (let i = 0; i < n; i++) { const a = off + i / n * Math.PI * 2; x.fillText(letters[Math.floor(R() * letters.length)], c + Math.cos(a) * r, c + Math.sin(a) * r); }
+    r += fs * 1.25;
+  }
+  x.fillStyle = "#b0182a"; x.beginPath(); x.arc(c, c, 4, 0, 7); x.fill();
+}
+redrawers.push(drawAnstis);
+
+/* ---------- 05 COLOUR ---------- */
+const cone = (l, p, a, b) => Math.exp(-0.5 * Math.pow((l - p) / (l < p ? a : b), 2));
+const Sc = l => cone(l, 420, 26, 32), Mc = l => cone(l, 534, 52, 38), Lc = l => cone(l, 564, 58, 42);
+function wl2rgb(w) {
+  let r = 0, g = 0, b = 0;
+  if (w < 440) { r = -(w - 440) / 60; b = 1; } else if (w < 490) { g = (w - 440) / 50; b = 1; } else if (w < 510) { g = 1; b = -(w - 510) / 20; }
+  else if (w < 580) { r = (w - 510) / 70; g = 1; } else if (w < 645) { r = 1; g = -(w - 645) / 65; } else r = 1;
+  const f = w < 420 ? 0.3 + 0.7 * (w - 380) / 40 : w > 680 ? 0.3 + 0.7 * (700 - w) / 20 : 1;
+  return [r * f, g * f, b * f];
+}
+const rgbStr = (c, k = 1) => `rgb(${c.map(v => Math.round(255 * Math.pow(clamp(v * k, 0, 1), 0.8))).join(",")})`;
+function drawCones() {
+  const svg = $("#coneSvg"), W = 640, H = 300, m = { l: 40, r: 16, t: 26, b: 58 };
+  const X = l => m.l + (l - 380) / 320 * (W - m.l - m.r), Y = v => m.t + (1 - v) * (H - m.t - m.b);
+  const ink = css("--ink"), muted = css("--muted"), rule = css("--rule"), surf = css("--surface");
+  const cols = { S: css("--cone-s"), M: css("--cone-m"), L: css("--cone-l") };
+  let s = `<defs><linearGradient id="spec" x1="0" x2="1">`;
+  for (let l = 380; l <= 700; l += 10) s += `<stop offset="${(l - 380) / 320}" stop-color="${rgbStr(wl2rgb(l))}"/>`;
+  s += `</linearGradient></defs>`;
+  [0, 0.5, 1].forEach(v => { s += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="${rule}"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="${muted}">${v}</text>`; });
+  s += `<rect x="${m.l}" y="${H - m.b + 6}" width="${W - m.l - m.r}" height="10" rx="2" fill="url(#spec)"/>`;
+  [400, 450, 500, 550, 600, 650, 700].forEach(l => { s += `<text x="${X(l)}" y="${H - m.b + 32}" text-anchor="middle" font-size="11" fill="${muted}">${l}</text>`; });
+  s += `<text x="${W - m.r}" y="${H - 6}" text-anchor="end" font-size="11" fill="${muted}">wavelength (nm)</text>`;
+  const fns = { S: Sc, M: Mc, L: Lc };
+  Object.entries(fns).forEach(([k, f]) => { let p = ""; for (let l = 380; l <= 700; l += 2) p += (l === 380 ? "M" : "L") + X(l).toFixed(1) + " " + Y(f(l)).toFixed(1); s += `<path d="${p}" fill="none" stroke="${cols[k]}" stroke-width="2"/>`; });
+  s += `<text x="${X(420)}" y="${Y(1) - 8}" text-anchor="middle" font-size="12" fill="${ink}">S 420</text>`;
+  s += `<text x="${X(527)}" y="${Y(1) - 8}" text-anchor="end" font-size="12" fill="${ink}">M 534</text>`;
+  s += `<text x="${X(571)}" y="${Y(1) - 8}" text-anchor="start" font-size="12" fill="${ink}">L 564</text>`;
+  s += `<line id="cCross" y1="${m.t}" y2="${H - m.b}" stroke="${ink}" stroke-width="1" opacity="0.5"/>`;
+  ["S", "M", "L"].forEach(k => s += `<circle id="cDot${k}" r="4.5" fill="${cols[k]}" stroke="${surf}" stroke-width="2"/>`);
+  s += `<rect id="cHit" x="${m.l}" y="0" width="${W - m.l - m.r}" height="${H - m.b + 20}" fill="transparent" style="cursor:crosshair"/>`;
+  svg.innerHTML = s;
+  const setWl = l => {
+    $("#cCross", svg).setAttribute("x1", X(l)); $("#cCross", svg).setAttribute("x2", X(l));
+    Object.entries(fns).forEach(([k, f]) => { const d = $("#cDot" + k, svg); d.setAttribute("cx", X(l)); d.setAttribute("cy", Y(f(l))); });
+    $("#wlOut").textContent = l + " nm"; $("#wS").textContent = Sc(l).toFixed(2); $("#wM").textContent = Mc(l).toFixed(2); $("#wL").textContent = Lc(l).toFixed(2);
+    $("#wSw").style.background = rgbStr(wl2rgb(l));
+    return { x: X(l), y: Math.min(Y(Sc(l)), Y(Mc(l)), Y(Lc(l))) };
+  };
+  setWl(+$("#wl").value);
+  const tip = $("#coneTip"), hit = $("#cHit", svg);
+  const move = ev => {
+    const r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W;
+    const l = clamp(Math.round((px - m.l) / (W - m.l - m.r) * 320 + 380), 380, 700);
+    $("#wl").value = l; const p = setWl(l);
+    tip.innerHTML = `${l} nm<br>S ${Sc(l).toFixed(2)} · M ${Mc(l).toFixed(2)} · L ${Lc(l).toFixed(2)}`;
+    tip.style.left = (p.x / W * r.width) + "px"; tip.style.top = (p.y / H * r.height) + "px"; tip.classList.add("on");
+  };
+  hit.addEventListener("pointermove", move); hit.addEventListener("pointerdown", move);
+  hit.addEventListener("pointerleave", () => tip.classList.remove("on"));
+  $("#wl").oninput = e => setWl(+e.target.value);
+  $("#coneTable").innerHTML = `<table><tr><th>nm</th><th>S</th><th>M</th><th>L</th></tr>` +
+    [400, 420, 450, 480, 500, 534, 550, 564, 580, 600, 630, 660, 700].map(l => `<tr><td>${l}</td><td>${Sc(l).toFixed(2)}</td><td>${Mc(l).toFixed(2)}</td><td>${Lc(l).toFixed(2)}</td></tr>`).join("") + `</table>`;
+}
+redrawers.push(drawCones);
+
+// metamer mixer
+function updateMix() {
+  const a = +$("#mixR").value / 100, b = +$("#mixG").value / 100;
+  $("#mixROut").textContent = Math.round(a * 100); $("#mixGOut").textContent = Math.round(b * 100);
+  const T = { S: Sc(580), M: Mc(580), L: Lc(580) };
+  const X = { S: a * Sc(630) + b * Sc(540), M: a * Mc(630) + b * Mc(540), L: a * Lc(630) + b * Lc(540) };
+  $("#patchT").style.background = rgbStr(wl2rgb(580));
+  // equivalent single wavelength with the same L:M ratio
+  const ratio = X.L / Math.max(X.M, 1e-6);
+  let best = 580, bd = 1e9;
+  for (let l = 540; l <= 630; l += 0.5) { const d = Math.abs(Lc(l) / Mc(l) - ratio); if (d < bd) { bd = d; best = l; } }
+  const k = (X.L + X.M) / (Lc(best) + Mc(best));
+  $("#patchM").style.background = X.L + X.M < 1e-3 ? "#000" : rgbStr(wl2rgb(best), k);
+  const cols = { S: "--cone-s", M: "--cone-m", L: "--cone-l" };
+  $("#mixBars").innerHTML = ["L", "M", "S"].map(c => `
+    <span>${c}</span><div class="bar"><i style="width:${clamp(T[c] / 1.2 * 100, 0, 100)}%;background:var(${cols[c]});opacity:.35"></i><i style="width:${clamp(X[c] / 1.2 * 100, 0, 100)}%;background:var(${cols[c]});height:50%;top:25%"></i></div><span>${X[c].toFixed(2)}/${T[c].toFixed(2)}</span>`).join("");
+  const err = Math.max(Math.abs(X.L - T.L) / T.L, Math.abs(X.M - T.M) / T.M);
+  const msg = $("#matchMsg");
+  if (err < 0.04) { msg.textContent = "Match. Your cones now send identical signals for both patches: a metamer."; msg.className = "match ok"; }
+  else { msg.textContent = `Off by ${Math.round(err * 100)}%. ${X.L / T.L > X.M / T.M ? "Too much red, or too little green." : "Too much green, or too little red."}`; msg.className = "match"; }
+}
+$("#mixR").addEventListener("input", updateMix); $("#mixG").addEventListener("input", updateMix);
+
+/* ---------- procedural market scene (shared by lab + afterimage) ---------- */
+const scene = document.createElement("canvas"); scene.width = 2048; scene.height = 1024;
+function fruit(x, cx, cy, r, base, hi, lo) {
+  const g = x.createRadialGradient(cx - r * 0.35, cy - r * 0.4, r * 0.1, cx, cy, r);
+  g.addColorStop(0, hi); g.addColorStop(0.45, base); g.addColorStop(1, lo);
+  x.fillStyle = g; x.beginPath(); x.arc(cx, cy, r, 0, 7); x.fill();
+}
+function paintScene() {
+  const x = scene.getContext("2d"), W = 2048, H = 1024, R = rng(42);
+  let g = x.createLinearGradient(0, 0, 0, 560); g.addColorStop(0, "#4F93DA"); g.addColorStop(1, "#CDE4F4");
+  x.fillStyle = g; x.fillRect(0, 0, W, H);
+  // sun
+  g = x.createRadialGradient(1840, 130, 5, 1840, 130, 190); g.addColorStop(0, "#FFFFF6"); g.addColorStop(0.22, "#FFF6CF"); g.addColorStop(1, "rgba(255,244,210,0)");
+  x.fillStyle = g; x.beginPath(); x.arc(1840, 130, 190, 0, 7); x.fill();
+  // clouds
+  x.fillStyle = "rgba(255,255,255,0.85)";
+  [[260, 120], [700, 80], [1350, 150]].forEach(([cx, cy]) => { for (let i = 0; i < 6; i++) { x.beginPath(); x.ellipse(cx + i * 38 - 90, cy + (i % 2) * 12, 70, 34, 0, 0, 7); x.fill(); } });
+  // hills
+  x.fillStyle = "#86AE7E"; x.beginPath(); x.moveTo(0, 560);
+  for (let i = 0; i <= W; i += 32) x.lineTo(i, 500 - Math.sin(i / 260) * 50 - Math.sin(i / 90) * 10);
+  x.lineTo(W, H); x.lineTo(0, H); x.fill();
+  x.fillStyle = "#5F8F58"; x.beginPath(); x.moveTo(0, 620);
+  for (let i = 0; i <= W; i += 32) x.lineTo(i, 580 - Math.sin(i / 180 + 2) * 30);
+  x.lineTo(W, H); x.lineTo(0, H); x.fill();
+  // ground cobbles
+  x.fillStyle = "#B7A68C"; x.fillRect(0, 760, W, H - 760);
+  for (let y = 770; y < H; y += 26) for (let i = -20; i < W; i += 46) {
+    x.fillStyle = R() < 0.5 ? "#A8977D" : "#C4B498"; x.beginPath(); x.roundRect ? x.roundRect(i + (y / 26 % 2) * 23, y, 40, 20, 7) : x.rect(i, y, 40, 20); x.fill();
+  }
+  // stall back wall
+  x.fillStyle = "#7B4E31"; x.fillRect(300, 330, 1200, 330);
+  x.strokeStyle = "#5E3A23"; x.lineWidth = 3;
+  for (let i = 330; i < 1500; i += 60) { x.beginPath(); x.moveTo(i, 330); x.lineTo(i, 660); x.stroke(); }
+  // eye chart poster
+  x.fillStyle = "#F7F5EE"; x.fillRect(1150, 370, 250, 270);
+  x.fillStyle = "#111"; x.textAlign = "center"; x.textBaseline = "alphabetic";
+  [["E", 70], ["FP", 44], ["TOZ", 32], ["LPED", 23], ["PECFD", 17], ["EDFCZP", 13], ["FELOPZD", 10]].reduce((y, [t, s]) => { x.font = `700 ${s}px Arial, sans-serif`; x.fillText(t.split("").join(" "), 1275, y + s); return y + s + 9; }, 380);
+  x.fillStyle = "#C8272D"; x.fillRect(1160, 628, 115, 6); x.fillStyle = "#2E9A48"; x.fillRect(1275, 628, 115, 6);
+  // neon OPEN sign
+  x.fillStyle = "#1c1c1c"; x.fillRect(560, 380, 260, 100);
+  x.shadowColor = "#39FF6A"; x.shadowBlur = 24; x.fillStyle = "#6CFF8E"; x.font = "800 64px Arial, sans-serif"; x.fillText("OPEN", 690, 455); x.shadowBlur = 0;
+  // awning
+  for (let i = 0; i < 20; i++) { x.fillStyle = i % 2 ? "#F3EEE4" : "#D2352A"; x.fillRect(260 + i * 64, 240, 64, 90); x.beginPath(); x.arc(292 + i * 64, 330, 32, 0, Math.PI); x.fill(); }
+  // posts
+  x.fillStyle = "#5E3A23"; x.fillRect(290, 240, 22, 560); x.fillRect(1490, 240, 22, 560);
+  // counter
+  x.fillStyle = "#A8733F"; x.fillRect(280, 650, 1240, 30); x.fillStyle = "#8C5C30"; x.fillRect(290, 680, 1220, 120);
+  // crates + fruit
+  const crates = [
+    ["#C8232C", "#FF8A80", "#6E0E12", 26], // red apples
+    ["#7DB53A", "#D8F5A0", "#3C6516", 26], // green apples
+    ["#F28C1C", "#FFD199", "#9A4A05", 25], // oranges
+    ["#F2D22E", "#FFF7B8", "#A88A0A", 22], // lemons
+    ["#6B2A6E", "#C890CB", "#2E0D30", 18], // plums
+    ["#3B4BA8", "#9FB0F2", "#141C55", 11], // blueberries
+  ];
+  crates.forEach(([b, hi, lo, r], k) => {
+    const x0 = 330 + k * 195, top = 575;
+    for (let row = 0; row < 4; row++) {
+      const n = Math.floor((170 - row * 26) / (r * 1.7));
+      for (let i = 0; i < n; i++) fruit(x, x0 + 20 + row * 13 + i * r * 1.7 + (R() - 0.5) * 4, top + 50 - row * r * 1.25 + (R() - 0.5) * 4, r, b, hi, lo);
+    }
+    x.fillStyle = "#C79A5E"; x.fillRect(x0, top + 45, 180, 60); x.strokeStyle = "#8F6636"; x.lineWidth = 3; x.strokeRect(x0, top + 45, 180, 60);
+    x.fillStyle = "#FFF"; x.fillRect(x0 + 55, top + 60, 70, 30); x.fillStyle = "#222"; x.font = "700 20px Arial, sans-serif"; x.fillText(["$2", "$2", "$3", "$1", "$4", "$5"][k], x0 + 90, top + 83);
+  });
+  // chalkboard
+  x.fillStyle = "#6A4A2F"; x.fillRect(90, 420, 16, 360); x.fillRect(360, 420, 16, 360);
+  x.fillStyle = "#2B3A33"; x.fillRect(70, 410, 330, 250); x.strokeStyle = "#8B6A45"; x.lineWidth = 10; x.strokeRect(70, 410, 330, 250);
+  x.fillStyle = "#EFEDE2"; x.textAlign = "left"; x.font = "800 38px Arial, sans-serif"; x.fillText("FRESH TODAY", 96, 465);
+  x.font = "500 25px Arial, sans-serif";
+  ["Red apples   3 for $2", "Plums          $4 / lb", "Blueberries      $5", "Lemons          4 for $1"].forEach((t, i) => x.fillText(t, 96, 515 + i * 36));
+  x.fillStyle = "#F2B5C8"; x.fillText("♥ local farms", 96, 650);
+  // traffic light
+  x.fillStyle = "#3a3a3a"; x.fillRect(1778, 300, 14, 480);
+  x.fillStyle = "#1E1E1E"; x.fillRect(1740, 300, 90, 230);
+  [["#FF3B30", 1], ["#4A3A10", 0], ["#10321C", 0]].forEach(([c, lit], i) => {
+    if (lit) { x.shadowColor = c; x.shadowBlur = 40; } x.fillStyle = c; x.beginPath(); x.arc(1785, 345 + i * 70, 26, 0, 7); x.fill(); x.shadowBlur = 0;
+  });
+  // balloons
+  [["#E0242F", 1580, 260], ["#2563EB", 1640, 220], ["#F5C518", 1620, 300], ["#1FA34A", 1560, 190]].forEach(([c, bx, by]) => {
+    x.strokeStyle = "#555"; x.lineWidth = 2; x.beginPath(); x.moveTo(bx, by + 50); x.quadraticCurveTo(bx - 20, by + 200, 1512, 420); x.stroke();
+    fruit(x, bx, by, 46, c, "#ffffff", c);
+  });
+  // flower bed
+  for (let i = 0; i < 520; i++) {
+    const fx = R() * W, fy = 880 + R() * 150;
+    x.fillStyle = ["#3F7A2E", "#4E8F36", "#2F6424"][i % 3]; x.beginPath(); x.ellipse(fx, fy, 16, 7, R() * 3, 0, 7); x.fill();
+  }
+  for (let i = 0; i < 170; i++) {
+    const fx = R() * W, fy = 870 + R() * 150, c = ["#D7263D", "#F46FA0", "#D7263D", "#F8961E", "#F9E04B", "#7B5CD6"][Math.floor(R() * 6)];
+    for (let p = 0; p < 5; p++) { const a = p / 5 * 7; x.fillStyle = c; x.beginPath(); x.arc(fx + Math.cos(a) * 8, fy + Math.sin(a) * 8, 7, 0, 7); x.fill(); }
+    x.fillStyle = "#F4D35E"; x.beginPath(); x.arc(fx, fy, 4.5, 0, 7); x.fill();
+  }
+  x.textAlign = "start";
+}
+
+/* ---------- retinal blood vessels texture ---------- */
+const vessels = document.createElement("canvas"); vessels.width = vessels.height = 1024;
+function paintVessels() {
+  const x = vessels.getContext("2d"), R = rng(9), fov = [256, 486];
+  x.fillStyle = "#000"; x.fillRect(0, 0, 1024, 1024); x.strokeStyle = "#fff"; x.lineCap = "round";
+  const grow = (px, py, ang, wdt, steps, curve) => {
+    for (let s = 0; s < steps && wdt > 1; s++) {
+      const nx = px + Math.cos(ang) * 16, ny = py + Math.sin(ang) * 16;
+      if (Math.hypot(nx - fov[0], ny - fov[1]) < 55 || Math.hypot(nx - 512, ny - 512) > 470) return;
+      x.lineWidth = wdt; x.beginPath(); x.moveTo(px, py); x.lineTo(nx, ny); x.stroke();
+      px = nx; py = ny; ang += curve + (R() - 0.5) * 0.28; wdt *= 0.982;
+      if (R() < 0.09) grow(px, py, ang + (R() < 0.5 ? -1 : 1) * (0.5 + R() * 0.5), wdt * 0.7, steps - s, curve * 0.5);
+    }
+  };
+  grow(512, 500, -2.3, 11, 60, -0.022); grow(512, 524, 2.3, 11, 60, 0.022);
+  grow(512, 500, -0.9, 9, 45, 0.01); grow(512, 524, 0.9, 9, 45, -0.01);
+  grow(512, 512, -1.6, 6, 30, 0.02); grow(512, 512, 1.6, 6, 30, -0.02);
+}
+
+/* ---------- 06 AFTERIMAGE ---------- */
+let afterTimer = null;
+function drawAfter(mode) {
+  const cv = $("#afterCanvas"), x = cv.getContext("2d");
+  x.drawImage(scene, 0, 0, cv.width, cv.height);
+  const img = x.getImageData(0, 0, cv.width, cv.height), d = img.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const r = d[i], g = d[i + 1], b = d[i + 2], Y = 0.299 * r + 0.587 * g + 0.114 * b;
+    if (mode === "gray") { d[i] = d[i + 1] = d[i + 2] = Y; }
+    else { d[i] = clamp(Y - (r - Y) * 1.4, 0, 255); d[i + 1] = clamp(Y - (g - Y) * 1.4, 0, 255); d[i + 2] = clamp(Y - (b - Y) * 1.4, 0, 255); }
+  }
+  x.putImageData(img, 0, 0);
+}
+$("#afterGo").addEventListener("click", () => {
+  clearInterval(afterTimer); drawAfter("inv");
+  let t = 20; const c = $("#afterCount"); c.hidden = false; c.textContent = t;
+  afterTimer = setInterval(() => {
+    t--; c.textContent = t;
+    if (t <= 0) { clearInterval(afterTimer); drawAfter("gray"); c.textContent = "keep staring"; }
+  }, 1000);
+});
+$("#afterReset").addEventListener("click", () => { clearInterval(afterTimer); $("#afterCount").hidden = true; drawAfter("inv"); });
+
+/* ---------- 07 CHECKER SHADOW ---------- */
+let checkerHide = false;
+function drawChecker() {
+  const cv = $("#checker"), W = 480, H = 420, dpr = Math.min(devicePixelRatio || 1, 2);
+  cv.width = W * dpr; cv.height = H * dpr; const x = cv.getContext("2d");
+  const img = x.createImageData(W * dpr, H * dpr), d = img.data;
+  const s = 64, ox = 80, oy = 60, L = 208, D = 125, core = D / L;
+  // shadow cast by a cylinder at top-right, running down-left
+  const A = [4.5, 0.6], B = [2.4, 2.0];
+  const segDist = (px, py) => { const vx = B[0] - A[0], vy = B[1] - A[1]; const t = clamp(((px - A[0]) * vx + (py - A[1]) * vy) / (vx * vx + vy * vy), 0, 1); return Math.hypot(px - A[0] - t * vx, py - A[1] - t * vy); };
+  const bg = checkerHide ? [248, 250, 251] : [206, 210, 214];
+  for (let j = 0; j < H * dpr; j++) for (let i = 0; i < W * dpr; i++) {
+    const px = i / dpr, py = j / dpr, k = (j * W * dpr + i) * 4;
+    const gx = (px - ox) / s, gy = (py - oy) / s;
+    let v;
+    if (gx >= 0 && gx < 5 && gy >= 0 && gy < 5) {
+      const cx = Math.floor(gx), cy = Math.floor(gy);
+      v = (cx + cy) % 2 === 0 ? L : D;
+      const sd = segDist(gx, gy);
+      const sh = 1 - (1 - core) * (1 - smooth(0.85, 1.5, sd));
+      v *= sh;
+      const isA = cx === 1 && cy === 3, isB = cx === 3 && cy === 1;
+      if (checkerHide && !isA && !isB) v = -1;
+    } else v = -1;
+    if (v < 0) { d[k] = bg[0]; d[k + 1] = bg[1]; d[k + 2] = bg[2]; } else { d[k] = d[k + 1] = d[k + 2] = Math.round(v); }
+    d[k + 3] = 255;
+  }
+  x.putImageData(img, 0, 0); x.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (!checkerHide) {
+    // cylinder
+    const cx = ox + 4.5 * s, base = oy + 0.75 * s, top = oy - 30;
+    const g = x.createLinearGradient(cx - 34, 0, cx + 34, 0); g.addColorStop(0, "#3B8A4A"); g.addColorStop(0.45, "#7CC88A"); g.addColorStop(1, "#24592F");
+    x.fillStyle = g; x.fillRect(cx - 34, top, 68, base - top);
+    x.beginPath(); x.ellipse(cx, base, 34, 11, 0, 0, Math.PI); x.fill();
+    x.fillStyle = "#8FD39B"; x.beginPath(); x.ellipse(cx, top, 34, 11, 0, 0, 7); x.fill();
+  }
+  x.fillStyle = "#FFFFFF"; x.font = "700 26px Arial, sans-serif"; x.textAlign = "center"; x.textBaseline = "middle";
+  x.fillStyle = "#EEE"; x.fillText("A", ox + 1.5 * s, oy + 3.5 * s);
+  x.fillStyle = "#EEE"; x.fillText("B", ox + 3.5 * s, oy + 1.5 * s);
+}
+function smooth(a, b, v) { const t = clamp((v - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); }
+$("#checkerBtn").addEventListener("click", e => { checkerHide = !checkerHide; e.target.setAttribute("aria-pressed", checkerHide); e.target.textContent = checkerHide ? "Show the whole board" : "Hide everything except A and B"; drawChecker(); });
+
+/* ---------- 08 LAB ---------- */
+const PARTS = [
+  { group: "Front of the eye", items: [
+    { k: "cornea", n: "Cornea", s: "Clear dome that does two-thirds of the focusing" },
+    { k: "iris", n: "Iris", s: "Coloured ring that sets the pupil size" },
+    { k: "lens", n: "Lens", s: "Adjustable fine-focus" },
+  ]},
+  { group: "Retina", items: [
+    { k: "L", n: "Long (L) cones", s: "Most sensitive to yellow-red light" },
+    { k: "M", n: "Medium (M) cones", s: "Most sensitive to green light" },
+    { k: "S", n: "Short (S) cones", s: "Most sensitive to blue-violet light" },
+    { k: "rods", n: "Rods", s: "Night vision" },
+    { k: "macula", n: "Macula", s: "Central retina, including the fovea" },
+    { k: "periphery", n: "Peripheral retina", s: "Everything outside the central 10°" },
+  ]},
+  { group: "Brain", items: [
+    { k: "brain", n: "Brain's corrections", s: "Flipping, filling-in, and stitching together detail" },
+  ]},
+  { group: "Damage instead of removal", dmg: true, items: [
+    { k: "cataract", n: "Cloud the lens", s: "Proteins in the lens clump with age" },
+    { k: "astig", n: "Warp the cornea", s: "Curved more in one direction than the other" },
+  ]},
+];
+const EXPLAIN = {
+  cornea: ["No cornea", "Without the cornea the eye loses about 43 of its 60 dioptres. The lens alone can't come close to focusing, so the world becomes light, dark and colour with almost no shapes. The nearest real cases are severe corneal scarring or keratoconus, often treated with a corneal transplant."],
+  iris: ["No iris · aniridia", "With no iris the pupil is as wide as the whole cornea. In daylight far too much light floods in, so everything glares and washes out. Depth of field also shrinks, which softens focus. People born with aniridia often wear tinted lenses. Lower the light level and it matters less, since a normal pupil would be wide open anyway."],
+  lens: ["No lens · aphakia", "The eye still has its cornea but loses about 20 dioptres, leaving it heavily farsighted and unable to adjust focus. Before artificial lens implants, cataract patients got thick glasses after surgery. The natural lens also filters ultraviolet: after Claude Monet's cataract operation he reportedly saw more blues and violets."],
+  L: ["No L cones · protanopia", "Reds and greens become hard to separate, and red looks darker because the long-wavelength cone was catching most of it. Check the red traffic light, the red apples against the green ones, and the red flowers in the leaves. Roughly 1 in 100 men."],
+  M: ["No M cones · deuteranopia", "The most common form of red–green colour blindness family (deuteranomaly is milder and more common still). Red, orange, yellow and green all shift toward a shared mustard-olive range. Blue stays distinct. Around 1 in 100 men have full deuteranopia and about 5 in 100 have a milder form."],
+  S: ["No S cones · tritanopia", "Blue and green become hard to separate, and yellow can shift toward pink. Tritanopia is rare, around 1 in 10,000 people, and it is not sex-linked because the S-cone gene is not on the X chromosome."],
+  cones2: ["Only one cone type · cone monochromacy", "With just one cone type there is nothing to compare its signal against, so colour vanishes entirely. If the surviving cone is the S type (blue cone monochromacy), detail suffers too, because S cones are sparse and absent from the centre of the fovea."],
+  cones3: ["No cones · achromatopsia", "Only rods remain. In daylight they are overwhelmed, so the world is a painful glare of greys. Detail is poor, and the centre of gaze is blind because the foveola has no rods. Dim the light level and this eye does comparatively well. Achromatopsia affects about 1 in 30,000 people."],
+  rods: ["No rods · night blindness", "In daylight you would barely notice. Now drag the light level down: as cones stop working, there is nothing to take over and the scene goes black. Retinitis pigmentosa often starts this way, with night blindness years before other symptoms. Vitamin A deficiency causes it too, because the rods' pigment is built from it."],
+  macula: ["No macula · macular degeneration", "A blurred, smeared patch sits wherever you look, and straight lines nearby look wavy. Try to read the eye chart on the wall: you have to look beside things to see them. Age-related macular degeneration is a leading cause of vision loss in older adults, yet the periphery stays intact."],
+  periphery: ["No peripheral retina · tunnel vision", "Only a central island survives. You can read the chart if you aim right at it, but you would walk into the chalkboard. Advanced glaucoma and retinitis pigmentosa narrow the field like this, often so gradually that people don't notice until it is advanced."],
+  brain: ["Brain's corrections off · the raw retinal image", "This is closer to what arrives at the retina: rotated 180°, with a hole where the optic nerve leaves, shadows of your own blood vessels, and detail and colour fading away from where you look. The brain flips the image, fills the hole, ignores the vessels because they never move relative to the retina, and builds a sharp, colourful scene from many fixations. Move the pointer and watch the blind spot and vessels follow your gaze."],
+  cataract: ["Clouded lens · cataract", "Light scatters in the lens, so contrast drops, bright things bloom with halos, and the world takes on a yellow-brown tint. Cataracts develop slowly with age and are fixed by replacing the lens with a plastic one. It is one of the most common operations in the world."],
+  astig: ["Warped cornea · astigmatism", "When the cornea is shaped more like a spoon than a ball, lines in one direction focus while lines at right angles smear. Look at the eye chart and the text on the chalkboard: strokes blur more along one diagonal. Most people have a little astigmatism."],
+  night: ["Low light · scotopic vision", "Below moonlight, cones fall silent and rods take over. Colour drains away, reds turn nearly black while blues stay relatively bright (the Purkinje shift), detail drops, and the image gets grainy because so few photons arrive. There is also a tiny blind spot at the centre of your gaze, which is why astronomers look slightly to the side of faint stars."],
+  dusk: ["Twilight · mesopic vision", "Rods and cones share the work. Colours are muted, and reds fade before blues do. Compare the red and blue balloons as you lower the slider."],
+};
+const state = { cornea: 1, iris: 1, lens: 1, L: 1, M: 1, S: 1, rods: 1, macula: 1, periphery: 1, brain: 1, cataract: 0, astig: 0 };
+let light = 1, gaze = [0.55, 0.55];
+function buildParts() {
+  $("#parts").innerHTML = PARTS.map(g => `<div class="pgroup"><div class="eyebrow">${g.group}</div>` + g.items.map(it =>
+    `<label class="tog ${g.dmg ? "dmg" : ""}" for="p_${it.k}"><input type="checkbox" id="p_${it.k}" data-k="${it.k}"><span class="n">${it.n}</span><span class="s">${it.s}</span></label>`).join("") + `</div>`).join("");
+  $$("#parts input").forEach(i => i.addEventListener("change", () => { state[i.dataset.k] = i.checked ? 1 : 0; syncParts(); }));
+  syncParts();
+}
+function syncParts() {
+  $$("#parts input").forEach(i => { const on = !!state[i.dataset.k]; i.checked = on; const dmg = i.closest(".dmg"); i.closest(".tog").classList.toggle("off", !dmg && !on); });
+  const cards = [];
+  const missing = ["L", "M", "S"].filter(k => !state[k]).length;
+  ["cornea", "iris", "lens"].forEach(k => { if (!state[k]) cards.push(EXPLAIN[k]); });
+  if (state.cataract) cards.push(EXPLAIN.cataract);
+  if (state.astig) cards.push(EXPLAIN.astig);
+  if (missing === 1) cards.push(EXPLAIN[["L", "M", "S"].find(k => !state[k])]);
+  if (missing === 2) cards.push(EXPLAIN.cones2);
+  if (missing === 3) cards.push(EXPLAIN.cones3);
+  ["rods", "macula", "periphery", "brain"].forEach(k => { if (!state[k]) cards.push(EXPLAIN[k]); });
+  if (light < 0.35) cards.push(EXPLAIN.night); else if (light < 0.7) cards.push(EXPLAIN.dusk);
+  $("#explain").innerHTML = cards.length ? cards.map(([h, p]) => `<div class="xcard"><span class="cond">What you are seeing</span><h4>${h}</h4><p>${p}</p></div>`).join("")
+    : `<div class="xcard"><span class="cond">What you are seeing</span><h4>A healthy eye, as your brain presents it</h4><p>Everything looks sharp, colourful and complete. That is partly an illusion: only the small area around the ring is truly sharp, and your brain is hiding a hole, a set of blood vessels and an upside-down image. Untick <strong>Brain's corrections</strong> to see what it's covering up, or remove any other part.</p></div>`;
+  requestDraw();
+}
+const PRESETS = {
+  normal: {},
+  raw: { brain: 0 },
+  deutan: { M: 0 },
+  night: { __light: 0.12 },
+  amd: { macula: 0 },
+  monet: { cataract: 1 },
+};
+$$("[data-preset]").forEach(b => b.addEventListener("click", () => {
+  Object.assign(state, { cornea: 1, iris: 1, lens: 1, L: 1, M: 1, S: 1, rods: 1, macula: 1, periphery: 1, brain: 1, cataract: 0, astig: 0 });
+  const p = PRESETS[b.dataset.preset]; light = p.__light ?? 1; $("#light").value = Math.round(light * 100); setLightLabel();
+  Object.entries(p).forEach(([k, v]) => { if (k !== "__light") state[k] = v; });
+  syncParts();
+}));
+function setLightLabel() { $("#lightOut").textContent = light > 0.85 ? "Daylight" : light > 0.6 ? "Overcast" : light > 0.35 ? "Dusk" : light > 0.15 ? "Moonlight" : "Starlight"; }
+$("#light").addEventListener("input", e => { light = e.target.value / 100; setLightLabel(); syncParts(); });
+
+const VS = `attribute vec2 p; varying vec2 vUv; void main(){ vUv = vec2(p.x*0.5+0.5, 0.5-p.y*0.5); gl_Position = vec4(p,0.,1.); }`;
+const FS = `precision highp float;
+varying vec2 vUv;
+uniform sampler2D uTex; uniform sampler2D uVes;
+uniform vec2 uGaze; uniform float uLight; uniform float uTime;
+uniform float uCornea, uIris, uLens, uCat, uAstig, uL, uM, uS, uRods, uMac, uPer, uRaw;
+const float ASP = 2.0;
+vec3 tap(vec2 uv, float b){ return pow(texture2D(uTex, clamp(uv, 0.001, 0.999), b).rgb, vec3(2.2)); }
+vec3 disc(vec2 uv, float r){
+  if (r < 0.0005) return tap(uv, 0.0);
+  float b = log2(max(r * 2048.0 / 5.0, 1.0));
+  vec3 a = vec3(0.0);
+  for (int i = 0; i < 16; i++){ float f = float(i); float rr = sqrt((f + 0.5) / 16.0) * r; float an = f * 2.39996;
+    a += tap(uv + vec2(cos(an), sin(an) * ASP) * rr, b); }
+  return a / 16.0;
+}
+vec3 streak(vec2 uv, float r, vec2 dir, float b){
+  vec3 a = vec3(0.0);
+  for (int i = 0; i < 14; i++){ float t = float(i) / 13.0 * 2.0 - 1.0; a += tap(uv + dir * vec2(1.0, ASP) * t * r, b); }
+  return a / 14.0;
+}
+float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+void main(){
+  vec2 uv = vUv;
+  vec2 p = uRaw > 0.5 ? vec2(1.0) - uv : uv;
+  vec2 dd = (p - uGaze) * vec2(80.0, 40.0);
+  float ecc = length(dd);
+  float nOff = uL + uM + uS;
+  float cones = nOff > 2.5 ? 0.0 : 1.0;
+  float cg = cones * smoothstep(0.22, 0.7, uLight);
+  if (uMac > 0.5){ float w = exp(-ecc * ecc / 110.0); p += vec2(sin(dd.y * 0.9), cos(dd.x * 0.8)) * 0.007 * w; }
+  float blur = uCornea * 0.045 + uLens * 0.02 + uCat * 0.0035 + uIris * 0.002;
+  blur += (1.0 - cg) * 0.0035;
+  if (nOff > 1.5 && nOff < 2.5 && uS < 0.5) blur += 0.004;
+  blur += uRaw * min(ecc, 45.0) * 0.00032;
+  vec3 c = uAstig > 0.5 ? streak(p, blur + 0.011, normalize(vec2(0.8, 0.6)), log2(max(blur * 2048.0 / 5.0, 1.0))) : disc(p, blur);
+  float glare = uCat * 0.7 + uIris * 0.9 * uLight + (1.0 - cones) * smoothstep(0.5, 1.0, uLight) * 1.2 + uCornea * 0.3;
+  if (glare > 0.0){
+    vec3 h = disc(p, 0.06);
+    c += glare * max(h - vec3(0.35), 0.0) * 1.6;
+    if (uCat > 0.5) c = mix(c, h, 0.3) * vec3(1.0, 0.84, 0.55);
+  }
+  if (uIris > 0.5) c *= mix(1.0, 2.3, uLight);
+  vec3 cc = c;
+  if (nOff > 0.5 && nOff < 1.5){
+    if (uL > 0.5) cc = vec3(dot(vec3(0.152286, 1.052583, -0.204868), c), dot(vec3(0.114503, 0.786281, 0.099216), c), dot(vec3(-0.003882, -0.048116, 1.051998), c));
+    else if (uM > 0.5) cc = vec3(dot(vec3(0.367322, 0.860646, -0.227968), c), dot(vec3(0.280085, 0.672501, 0.047413), c), dot(vec3(-0.011820, 0.042940, 0.968881), c));
+    else cc = vec3(dot(vec3(1.255528, -0.076749, -0.178779), c), dot(vec3(-0.078411, 0.930809, 0.147602), c), dot(vec3(0.004733, 0.691367, 0.303900), c));
+  } else if (nOff > 1.5 && nOff < 2.5){
+    float g = uL < 0.5 ? dot(c, vec3(0.45, 0.55, 0.0)) : (uM < 0.5 ? dot(c, vec3(0.2, 0.75, 0.05)) : dot(c, vec3(0.0, 0.2, 0.8)) * 0.8);
+    cc = vec3(g);
+  }
+  // mesopic colour loss: reds fade first
+  float Y = dot(cc, vec3(0.2126, 0.7152, 0.0722));
+  float sat = smoothstep(0.25, 0.8, uLight) * (1.0 - uRaw * smoothstep(12.0, 45.0, ecc) * 0.75);
+  cc = mix(vec3(Y), cc, sat);
+  cc.r *= mix(0.55, 1.0, smoothstep(0.3, 0.8, uLight));
+  // rods
+  float Ys = dot(c, vec3(0.02, 0.55, 0.43)) * 1.15;
+  float rg = 1.0 - uRods;
+  if (cones < 0.5) Ys = Ys * (1.0 + 2.4 * smoothstep(0.5, 1.0, uLight)) + 0.25 * smoothstep(0.6, 1.0, uLight);
+  else rg *= 1.0 - smoothstep(0.55, 0.95, uLight);
+  vec3 rod = vec3(Ys) * vec3(0.86, 0.93, 1.08) * rg * mix(0.08, 1.0, smoothstep(0.4, 1.6, ecc));
+  vec3 col = cg * cc + (1.0 - cg) * rod;
+  col *= mix(0.16, 1.0, smoothstep(0.0, 0.75, uLight));
+  float n = hash(floor(uv * vec2(640.0, 320.0)) + vec2(fract(uTime * 7.13) * 91.0, fract(uTime * 3.7) * 57.0)) - 0.5;
+  col += vec3(n) * 0.09 * (1.0 - smoothstep(0.1, 0.55, uLight)) * (0.2 + sqrt(max(dot(col, vec3(0.33)), 0.0)));
+  if (uRaw > 0.5){
+    vec2 bs = uGaze + vec2(15.0 / 80.0, 1.5 / 40.0);
+    vec2 vv = vec2(0.5) + (p - bs) * vec2(80.0, 40.0) / 60.0;
+    float ves = texture2D(uVes, clamp(vv, 0.0, 1.0)).r;
+    col *= 1.0 - 0.55 * ves;
+    vec2 bd = (p - bs) * vec2(80.0, 40.0) / vec2(2.8, 3.8);
+    col = mix(col, vec3(0.0), 1.0 - smoothstep(0.85, 1.0, length(bd)));
+  }
+  if (uMac > 0.5){
+    float an = atan(dd.y, dd.x);
+    float r = 5.5 + 1.1 * sin(an * 3.0) + 0.6 * sin(an * 7.0 + 1.3);
+    vec3 smear = disc(p, 0.03) * 0.35 + vec3(0.06);
+    col = mix(smear * mix(0.16, 1.0, smoothstep(0.0, 0.75, uLight)), col, smoothstep(r - 1.8, r + 1.8, ecc));
+  }
+  if (uPer > 0.5) col *= 1.0 - smoothstep(8.0, 12.0, ecc);
+  gl_FragColor = vec4(pow(clamp(col, 0.0, 1.0), vec3(1.0 / 2.2)), 1.0);
+}`;
+let gl, prog, U = {}, texScene, labVisible = false, needDraw = true;
+function requestDraw() { needDraw = true; }
+function mkTex(src) {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  return t;
+}
+function initLab() {
+  const cv = $("#labCanvas");
+  gl = cv.getContext("webgl", { antialias: false });
+  if (!gl) { $("#stage").innerHTML = `<p class="fallback">This browser has WebGL turned off, so the lab can't run here. Try a recent Chrome, Firefox or Safari.</p>`; return; }
+  const sh = (t, src) => { const s = gl.createShader(t); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) console.error(gl.getShaderInfoLog(s)); return s; };
+  prog = gl.createProgram(); gl.attachShader(prog, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(prog); gl.useProgram(prog);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, "p"); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  ["uTex", "uVes", "uGaze", "uLight", "uTime", "uCornea", "uIris", "uLens", "uCat", "uAstig", "uL", "uM", "uS", "uRods", "uMac", "uPer", "uRaw"].forEach(n => U[n] = gl.getUniformLocation(prog, n));
+  gl.activeTexture(gl.TEXTURE1); mkTex(vessels); gl.uniform1i(U.uVes, 1);
+  gl.activeTexture(gl.TEXTURE0); texScene = mkTex(scene); gl.uniform1i(U.uTex, 0);
+  new IntersectionObserver(es => { labVisible = es[0].isIntersecting; }).observe(cv);
+  const stage = $("#stage"), ring = $("#gaze");
+  const setGaze = ev => {
+    const r = cv.getBoundingClientRect(); const u = clamp((ev.clientX - r.left) / r.width, 0, 1), v = clamp((ev.clientY - r.top) / r.height, 0, 1);
+    gaze = state.brain ? [u, v] : [1 - u, 1 - v];
+    ring.style.left = u * 100 + "%"; ring.style.top = v * 100 + "%"; requestDraw();
+  };
+  stage.addEventListener("pointermove", setGaze); stage.addEventListener("pointerdown", setGaze);
+  ring.style.left = gaze[0] * 100 + "%"; ring.style.top = gaze[1] * 100 + "%";
+  requestAnimationFrame(loop);
+}
+function syncRing() {
+  const r = $("#gaze"); const u = state.brain ? gaze[0] : 1 - gaze[0], v = state.brain ? gaze[1] : 1 - gaze[1];
+  r.style.left = u * 100 + "%"; r.style.top = v * 100 + "%";
+}
+let lastBrain = 1;
+function loop(t) {
+  requestAnimationFrame(loop);
+  if (!labVisible) return;
+  const noisy = light < 0.55;
+  if (!needDraw && !noisy) return;
+  needDraw = false;
+  if (lastBrain !== state.brain) { lastBrain = state.brain; syncRing(); }
+  const cv = gl.canvas, dpr = Math.min(devicePixelRatio || 1, 2), w = Math.min(Math.round(cv.clientWidth * dpr), 2048), h = Math.round(w / 2);
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  gl.viewport(0, 0, w, h);
+  gl.uniform2f(U.uGaze, gaze[0], gaze[1]); gl.uniform1f(U.uLight, light); gl.uniform1f(U.uTime, t / 1000);
+  const off = k => 1 - state[k];
+  gl.uniform1f(U.uCornea, off("cornea")); gl.uniform1f(U.uIris, off("iris")); gl.uniform1f(U.uLens, off("lens"));
+  gl.uniform1f(U.uL, off("L")); gl.uniform1f(U.uM, off("M")); gl.uniform1f(U.uS, off("S")); gl.uniform1f(U.uRods, off("rods"));
+  gl.uniform1f(U.uMac, off("macula")); gl.uniform1f(U.uPer, off("periphery")); gl.uniform1f(U.uRaw, off("brain"));
+  gl.uniform1f(U.uCat, state.cataract); gl.uniform1f(U.uAstig, state.astig);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+$("#upload").addEventListener("change", e => {
+  const f = e.target.files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { const im = new Image(); im.onload = () => {
+    const x = scene.getContext("2d"), s = Math.max(2048 / im.width, 1024 / im.height), w = im.width * s, h = im.height * s;
+    x.fillStyle = "#000"; x.fillRect(0, 0, 2048, 1024); x.drawImage(im, (2048 - w) / 2, (1024 - h) / 2, w, h);
+    if (gl) { gl.activeTexture(gl.TEXTURE0); gl.deleteTexture(texScene); texScene = mkTex(scene); }
+    drawAfter("inv"); requestDraw();
+  }; im.src = rd.result; };
+  rd.readAsDataURL(f);
+});
+
+/* ---------- boot ---------- */
+function boot() {
+  paintScene(); paintVessels();
+  drawOptics(); drawDensity(); drawMosaic(0); drawBlind(); drawAnstis(); drawCones(); updateMix(); drawAfter("inv"); drawChecker();
+  buildParts(); initLab();
+}
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(boot);
+})();
+</script>
+</body>
+</html>

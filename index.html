@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>The Seeing Machine</title>
+  <meta name="description" content="An anatomically scaled 3D eye: trace light through the cornea and lens, drive the six eye muscles, and follow a million axons from retina to visual cortex." />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <meta name="theme-color" content="#07090c" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body data-mode="optics">
+  <canvas id="gl"></canvas>
+  <div id="labels" aria-hidden="true"></div>
+  <div id="fade"></div>
+
+  <header class="hud">
+    <div class="brandrow">
+      <span class="brand">The Seeing Machine</span>
+      <a class="essay" href="article.html">Read the illustrated essay →</a>
+    </div>
+    <div class="eyebrow" id="eyebrow">01 · Optics</div>
+    <h1 id="title">Focus</h1>
+    <p class="lede" id="lede"></p>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <nav class="modes" id="modes" aria-label="Experiments">
+    <button data-mode="optics" class="on"><span>01</span>Focus</button>
+    <button data-mode="motor"><span>02</span>Movement</button>
+    <button data-mode="wiring"><span>03</span>Wiring</button>
+    <i class="sep" aria-hidden="true"></i>
+    <button id="labelBtn" class="tool on" aria-pressed="true" title="Show or hide labels (L)">Labels</button>
+  </nav>
+
+  <div class="rail">
+    <!-- ============================================================ OPTICS -->
+    <section class="panel" data-pane="optics">
+      <div class="cap">Presets</div>
+      <div class="seg wrap" id="opticsPresets">
+        <button data-p="young">Young eye</button>
+        <button data-p="myope">Myope −4 D</button>
+        <button data-p="hyper">Hyperope +3 D</button>
+        <button data-p="presby">Age 60, reading</button>
+      </div>
+      <label class="ctl"><span class="row"><span class="cap">Object distance</span><output id="distOut"></output></span>
+        <input type="range" id="dist" min="0" max="100" value="100" /></label>
+      <label class="ctl"><span class="row"><span class="cap">Age</span><output id="ageOut"></output></span>
+        <input type="range" id="age" min="8" max="75" value="25" /></label>
+      <label class="ctl"><span class="row"><span class="cap">Axial length</span><output id="axialOut"></output></span>
+        <input type="range" id="axial" min="2150" max="2750" value="2400" /></label>
+      <label class="ctl"><span class="row"><span class="cap">Pupil</span><output id="pupilOut"></output></span>
+        <input type="range" id="pupil" min="20" max="80" value="40" /></label>
+      <div class="toggles">
+        <label class="tog"><input type="checkbox" id="spec" /><span>Prescribe glasses</span></label>
+        <label class="tog"><input type="checkbox" id="offaxis" checked /><span>Off-axis point</span></label>
+      </div>
+    </section>
+
+    <section class="panel inset" data-pane="optics">
+      <div class="row"><span class="cap">On the fovea</span><span class="val" id="blurOut"></span></div>
+      <canvas id="retImg" class="ret"></canvas>
+      <p class="foot" id="opticsFoot"></p>
+    </section>
+
+    <!-- ============================================================ MOTOR -->
+    <section class="panel" data-pane="motor" hidden>
+      <div class="cap">Experiment</div>
+      <div class="seg wrap" id="expSeg">
+        <button data-x="follow" class="on">Follow cursor</button>
+        <button data-x="h">H-test</button>
+        <button data-x="saccade">Saccades</button>
+        <button data-x="pursuit">Pursuit</button>
+        <button data-x="verge">Vergence</button>
+      </div>
+      <label class="ctl" id="distCtl"><span class="row"><span class="cap">Target distance</span><output id="tdOut"></output></span>
+        <input type="range" id="tdist" min="80" max="800" value="400" /></label>
+      <label class="ctl" id="freqCtl" hidden><span class="row"><span class="cap">Pursuit frequency</span><output id="freqOut"></output></span>
+        <input type="range" id="freq" min="10" max="150" value="40" /></label>
+      <div class="cap" style="margin-top:12px">Cranial nerve palsy</div>
+      <div class="palsy">
+        <div class="pl"><b class="r">Right eye</b>
+          <button data-side="-1" data-n="III">III</button><button data-side="-1" data-n="IV">IV</button><button data-side="-1" data-n="VI">VI</button></div>
+        <div class="pl"><b class="l">Left eye</b>
+          <button data-side="1" data-n="III">III</button><button data-side="1" data-n="IV">IV</button><button data-side="1" data-n="VI">VI</button></div>
+      </div>
+      <table class="mtab" id="mtab"></table>
+    </section>
+
+    <section class="panel inset" data-pane="motor" hidden>
+      <div class="row"><span class="cap">What the patient sees <em>red-glass test</em></span><span class="val" id="dipOut"></span></div>
+      <canvas id="dip" class="dip"></canvas>
+      <div class="row" style="margin-top:10px"><span class="cap" id="traceCap">Eye position</span><span class="legend"><i class="r"></i>R <i class="l"></i>L <i class="t"></i>target</span></div>
+      <canvas id="trace" class="trace"></canvas>
+    </section>
+
+    <!-- ============================================================ WIRING -->
+    <section class="panel" data-pane="wiring" hidden>
+      <div class="cap">Stimulus</div>
+      <div class="seg" id="stimSeg">
+        <button data-s="probe" class="on">Probe</button>
+        <button data-s="flash">Full-field flash</button>
+        <button data-s="off">Off</button>
+      </div>
+      <div class="cap" style="margin-top:12px">Colour axons by</div>
+      <div class="seg" id="colSeg">
+        <button data-c="0" class="on">Eye of origin</button>
+        <button data-c="1">Visual hemifield</button>
+      </div>
+      <div class="cap" style="margin-top:12px">Lesion</div>
+      <div class="lesions" id="lesions"></div>
+      <div class="row custom">
+        <button class="btn" id="placeBtn">Place your own lesion</button>
+        <label class="mini">r <input type="range" id="lesR" min="10" max="80" value="30" /> <output id="lesROut">3 mm</output></label>
+      </div>
+    </section>
+
+    <section class="panel inset" data-pane="wiring" hidden>
+      <div class="row"><span class="cap">Visual fields <em>computed from surviving axons</em></span></div>
+      <div class="fields">
+        <figure><canvas id="fieldL"></canvas><figcaption><i class="l"></i>Left eye</figcaption></figure>
+        <figure><canvas id="fieldR"></canvas><figcaption><i class="r"></i>Right eye</figcaption></figure>
+      </div>
+      <p class="foot" id="lesionNote"></p>
+    </section>
+  </div>
+
+  <div class="hint" id="hint"></div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "the-seeing-machine",
+  "private": true,
+  "type": "module",
+  "description": "The Seeing Machine: an anatomically scaled 3D eye \u2014 optics, eye movements and the visual pathway",
+  "scripts": {
+    "start": "python3 serve.py 5174",
+    "deploy": "rm -rf dist && mkdir dist && cp -R index.html article.html style.css favicon.svg js dist/ && npx wrangler pages deploy dist --project-name seeing-machine --branch main"
+  }
+}
