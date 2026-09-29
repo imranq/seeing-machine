@@ -9,7 +9,7 @@ import { Line2 } from 'three/addons/lines/Line2.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { LineGeometry } from 'three/addons/lines/LineGeometry.js';
 
-import { Eye, RIGHT, LEFT, SIDES, eyeCenter, G, DISC, retinaLocal, brainGhost, orbitGhost } from './anatomy.js';
+import { Eye, RIGHT, LEFT, SIDES, eyeCenter, G, DISC, retinaLocal, brainGhost, orbitGhost, toonRamp } from './anatomy.js';
 import { solveOptics, rayBundles, SPECTACLE_T } from './optics.js';
 import { Oculomotor, GazeController, listingQuat, MUSCLE_DEFS } from './muscles.js';
 import { Pathway, skinUniforms, lesionPresets, glowTexture } from './pathway.js';
@@ -31,7 +31,7 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.95;
-renderer.setClearColor(0x07090c, 1);
+renderer.setClearColor(0x09110f, 1);
 
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
@@ -54,16 +54,16 @@ scene.add(new THREE.Mesh(
     vertexShader: 'varying vec3 vW; void main(){ vW = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.); }',
     fragmentShader: `varying vec3 vW; void main(){
       float up = vW.y*0.5+0.5;
-      vec3 c = mix(vec3(0.018,0.022,0.03), vec3(0.05,0.055,0.08), smoothstep(0.2,1.0,up));
-      c += vec3(0.06,0.04,0.09) * pow(max(0.0, dot(vW, normalize(vec3(-0.4,0.3,0.6)))), 6.0);
+      vec3 c = mix(vec3(0.025,0.045,0.038), vec3(0.055,0.085,0.067), smoothstep(0.2,1.0,up));
+      c += vec3(0.12,0.16,0.065) * pow(max(0.0, dot(vW, normalize(vec3(-0.4,0.3,0.6)))), 8.0);
       gl_FragColor = vec4(c,1.); }`,
   }),
 ));
-scene.add(new THREE.HemisphereLight(0xcfe0ff, 0x1a120d, 0.6));
-const key1 = new THREE.DirectionalLight(0xfff1e0, 1.9);
+scene.add(new THREE.HemisphereLight(0xe5edcf, 0x18231c, 0.8));
+const key1 = new THREE.DirectionalLight(0xfff0cb, 2.0);
 key1.position.set(-120, 200, 180);
 scene.add(key1);
-const rim = new THREE.DirectionalLight(0x9fb8ff, 1.2);
+const rim = new THREE.DirectionalLight(0xc4e879, 1.0);
 rim.position.set(160, 60, -200);
 scene.add(rim);
 
@@ -79,6 +79,20 @@ composer.addPass(new OutputPass());
 // ============================================================ anatomy
 const eyes = { [RIGHT]: new Eye(RIGHT), [LEFT]: new Eye(LEFT) };
 for (const s of SIDES) scene.add(eyes[s].group);
+const pupilLamp = new THREE.Group();
+const pupilBeam = new THREE.Mesh(
+  new THREE.ConeGeometry(3.8, 20, 24, 1),
+  new THREE.MeshBasicMaterial({ color: 0xd4f06d, transparent: true, opacity: 0.14, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }),
+);
+pupilBeam.geometry.rotateX(-Math.PI / 2); // cone tip points from the light toward the eye
+pupilBeam.position.z = 19.2;
+const pupilEmitter = new THREE.Mesh(
+  new THREE.SphereGeometry(1.15, 16, 12),
+  new THREE.MeshBasicMaterial({ color: 0xf1ffbb, toneMapped: false }),
+);
+pupilEmitter.position.z = 32;
+pupilLamp.add(pupilBeam, pupilEmitter);
+scene.add(pupilLamp);
 
 const brain = brainGhost();
 scene.add(brain);
@@ -116,7 +130,7 @@ class Ribbon {
         idx.push(a, c, b, b, c, d);
       }
     this.geo.setIndex(idx);
-    this.mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.5, metalness: 0, emissive: 0xff4a36, emissiveIntensity: 0 });
+    this.mat = new THREE.MeshToonMaterial({ vertexColors: true, gradientMap: toonRamp(), emissive: 0x9c3328, emissiveIntensity: 0 });
     this.mesh = new THREE.Mesh(this.geo, this.mat);
     this.mesh.frustumCulled = false;
     this.mid = new THREE.Vector3();
@@ -193,7 +207,7 @@ function updateRibbons() {
 // trochlea pulleys
 for (const s of SIDES) {
   const so = oc[s].muscles.find((m) => m.id === 'SO');
-  const t = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.55, 10, 24), new THREE.MeshStandardMaterial({ color: 0xdcd3c2, roughness: 0.4 }));
+  const t = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.55, 10, 24), new THREE.MeshToonMaterial({ color: 0xdcd3c2, gradientMap: toonRamp() }));
   t.position.copy(so.P).add(oc[s].center);
   t.lookAt(so.O.clone().add(oc[s].center));
   muscleGroup.add(t);
@@ -298,6 +312,7 @@ function lineMat(color, width, opacity) {
   return m;
 }
 const optics = { dist: Infinity, age: 25, axial: 24, pupil: 4, spec: false, offAxis: true, res: null };
+const pupilLab = { lightEye: RIGHT, intensity: 45, defect: 'none', diameters: { [RIGHT]: 4, [LEFT]: 4 } };
 
 function rebuildRays() {
   for (const c of [...rayGroup.children]) if (c !== objMarkers) { rayGroup.remove(c); c.geometry?.dispose(); }
@@ -417,6 +432,8 @@ const LABELS = {
     { text: 'Retina', pos: eyeLocal(RIGHT, -9.6, 0, -5) },
     { text: 'Fovea', pos: eyeLocal(RIGHT, 0, 0, -11.2), cls: 'ray' },
     { text: 'Optic disc (blind spot)', pos: () => retinaLocal(DISC.x, DISC.y, 1).applyQuaternion(eyes[RIGHT].group.quaternion).add(ER) },
+    { text: 'Right pupil · 4.0 mm', pos: eyeLocal(RIGHT, 0, 0, 9.5), cls: 'pupilR' },
+    { text: 'Left pupil · 4.0 mm', pos: eyeLocal(LEFT, 0, 0, 9.5), cls: 'pupilL' },
   ],
   motor: [],
   wiring: [],
@@ -444,21 +461,21 @@ const MODES = {
   optics: {
     eyebrow: '01 · Optics',
     title: 'Focus',
-    lede: 'A horizontal section through a <b>Le Grand schematic eye</b> at true scale. Every ray is traced through the cornea and the lens using Snell’s law. Move the object closer and the ciliary muscle rounds the lens. With age, it stops being able to.',
+    lede: 'Follow light from the cornea to the <b>retina</b>. Change distance, age and pupil size to see how accommodation and refractive error alter the image that reaches the fovea.',
     cam: { pos: [-45, 84, 2], target: [-31, 0, 2] },
     hint: 'Drag to orbit · scroll to zoom',
   },
   motor: {
     eyebrow: '02 · Movement',
     title: 'Six muscles, three nerves',
-    lede: 'Each muscle pulls through a pulley and wraps over the globe. The brain solves for the innervation that holds each eye in its <b>Listing’s-law</b> orientation. Paralyse a nerve and the forces no longer balance, so the eye drifts on its own.',
+    lede: 'Six muscles steer each eye, coordinated by cranial nerves <b>III, IV and VI</b>. Track pursuit and saccades, then interrupt a nerve to see how alignment and double vision change.',
     cam: { pos: [-128, 92, 150], target: [0, -8, -24] },
     hint: 'Move your pointer: both eyes look at it',
   },
   wiring: {
     eyebrow: '03 · Wiring',
     title: 'Retina to cortex',
-    lede: 'About 850 axons stand in for the <b>1.2 million</b> in each optic nerve, each tied to a point in the visual field. Nasal-retina fibres cross at the chiasm, and the upper field loops through the temporal lobe. Cut anywhere and the field charts show what is lost.',
+    lede: 'Trace a visual signal from retina through the <b>optic chiasm</b>, thalamic LGN and optic radiations to V1 in the occipital lobe. Lesions reveal how anatomy predicts blind areas in the visual field.',
     cam: { pos: [26, 390, -168], target: [26, -10, -88] },
     hint: 'Drag on a field chart to move the probe',
   },
@@ -480,6 +497,7 @@ function setMode(m, instant = false) {
   eyes[RIGHT].set({ cut: optics_ || wiring ? 0.5 : 0 });
   eyes[LEFT].set({ cut: wiring ? 0.5 : 0 });
   rayGroup.visible = optics_;
+  pupilLamp.visible = optics_ && pupilLab.intensity > 0;
   muscleGroup.visible = motor;
   nerveGroup.visible = motor;
   orbits.visible = motor;
@@ -541,25 +559,70 @@ function refreshChips() {
 const sliderFill = (el) => el.style.setProperty('--p', `${((el.value - el.min) / (el.max - el.min)) * 100}%`);
 const distOf = (v) => (v >= 100 ? Infinity : 100 * Math.pow(60, v / 99));
 const distTxt = (d) => (!Number.isFinite(d) ? '∞ (distant)' : d < 1000 ? `${Math.round(d / 10)} cm` : `${(d / 1000).toFixed(1)} m`);
+function updatePupilLab() {
+  const dark = +$('pupil').value / 10;
+  const strength = THREE.MathUtils.smoothstep(pupilLab.intensity / 100, 0.03, 0.92);
+  const afferentSide = pupilLab.defect.endsWith('-aff') ? (pupilLab.defect.startsWith('r') ? RIGHT : LEFT) : null;
+  const efferentSide = pupilLab.defect.endsWith('-eff') ? (pupilLab.defect.startsWith('r') ? RIGHT : LEFT) : null;
+  const afferentBlocked = afferentSide === pupilLab.lightEye;
+  for (const side of SIDES) {
+    if (side === efferentSide) pupilLab.diameters[side] = 7.5; // a denervated pupil is large and fixed
+    else if (afferentBlocked) pupilLab.diameters[side] = dark;
+    else pupilLab.diameters[side] = dark - (dark - 2.1) * strength;
+  }
+  $('lightOut').textContent = `${pupilLab.intensity}%`;
+  $('pupilRightOut').textContent = `${pupilLab.diameters[RIGHT].toFixed(1)} mm · ${pupilLab.lightEye === RIGHT ? 'direct' : 'consensual'}`;
+  $('pupilLeftOut').textContent = `${pupilLab.diameters[LEFT].toFixed(1)} mm · ${pupilLab.lightEye === LEFT ? 'direct' : 'consensual'}`;
+  sliderFill($('lightLevel'));
+  $('pupilStateOut').textContent = pupilLab.defect === 'none' ? 'Direct + consensual' : pupilLab.defect.endsWith('-aff') ? 'Afferent pathway' : 'Efferent pathway';
+  let note;
+  if (afferentBlocked) {
+    note = `Light enters the ${pupilLab.lightEye === RIGHT ? 'right' : 'left'} eye, but its <b>CN II afferent signal is interrupted</b>. Neither pupil receives the light command. Illuminate the other eye to compare.`;
+  } else if (efferentSide !== null) {
+    note = `The ${efferentSide === RIGHT ? 'right' : 'left'} pupil is <b>dilated and fixed</b>: its CN III output cannot constrict it. The fellow pupil still responds to light in either eye.`;
+  } else if (pupilLab.intensity < 4) {
+    note = 'In dim light, both pupils relax toward their dark-adapted size. Raise the light to trigger direct and consensual constriction.';
+  } else {
+    note = `Light in the ${pupilLab.lightEye === RIGHT ? 'right' : 'left'} eye constricts that pupil directly and the fellow pupil consensually. Bilateral output follows input from either eye.`;
+  }
+  $('pupilNote').innerHTML = note;
+  const lampPosition = eyeCenter(pupilLab.lightEye);
+  pupilLamp.position.set(lampPosition.x, 0, 0);
+  pupilLamp.visible = mode === 'optics' && pupilLab.intensity > 0;
+  pupilBeam.material.opacity = 0.035 + (pupilLab.intensity / 100) * 0.19;
+  for (const [cls, side, name] of [['pupilR', RIGHT, 'Right'], ['pupilL', LEFT, 'Left']]) {
+    const label = labels.find((l) => l.cls === cls);
+    if (label) label.el.lastChild.textContent = `${name} pupil · ${pupilLab.diameters[side].toFixed(1)} mm · ${side === pupilLab.lightEye ? 'direct' : 'consensual'}`;
+  }
+}
+document.querySelectorAll('#lightEyeSeg button').forEach((b) => b.addEventListener('click', () => {
+  pupilLab.lightEye = +b.dataset.eye;
+  document.querySelectorAll('#lightEyeSeg button').forEach((x) => x.classList.toggle('on', x === b));
+  updateOptics();
+}));
+$('lightLevel').addEventListener('input', () => { pupilLab.intensity = +$('lightLevel').value; updateOptics(); });
+$('pupilDefect').addEventListener('change', () => { pupilLab.defect = $('pupilDefect').value; updateOptics(); });
 function readOptics() {
   optics.dist = distOf(+$('dist').value);
   optics.age = +$('age').value;
   optics.axial = +$('axial').value / 100;
-  optics.pupil = +$('pupil').value / 10;
+  optics.pupil = pupilLab.diameters[RIGHT];
   optics.spec = $('spec').checked;
   optics.offAxis = $('offaxis').checked;
 }
 function updateOptics() {
+  updatePupilLab();
   readOptics();
   $('distOut').textContent = distTxt(optics.dist);
   $('ageOut').textContent = `${optics.age} y`;
   $('axialOut').textContent = `${optics.axial.toFixed(1)} mm`;
-  $('pupilOut').textContent = `${optics.pupil.toFixed(1)} mm`;
+  $('pupilOut').textContent = `${(+$('pupil').value / 10).toFixed(1)} mm dark`;
   for (const id of ['dist', 'age', 'axial', 'pupil']) sliderFill($(id));
   const res = solveOptics({ objDist: optics.dist, age: optics.age, axial: optics.axial, pupil: optics.pupil, correct: optics.spec });
   optics.res = res;
   const tint = THREE.MathUtils.clamp((optics.age - 35) / 40, 0, 1);
   eyes[RIGHT].set({ accom: res.A, pupil: optics.pupil, axial: optics.axial });
+  eyes[LEFT].set({ pupil: pupilLab.diameters[LEFT] });
   eyes[RIGHT].mat.lens.attenuationColor.set('#fff6dc').lerp(new THREE.Color('#e0a93a'), tint);
   eyes[RIGHT].mat.lens.attenuationDistance = 30 - 24 * tint;
   rebuildRays();
@@ -956,7 +1019,9 @@ window.addEventListener('resize', () => {
   composer.setSize(w, h);
   bloom.resolution.set(w, h);
   for (const m of rayMats) m.resolution.set(w, h);
-  if (mode === 'optics') drawRetinalImage($('retImg'), optics.res.blurArcmin, THREE.MathUtils.clamp((optics.age - 35) / 40, 0, 1));
+  if (mode === 'optics') {
+    drawRetinalImage($('retImg'), optics.res.blurArcmin, THREE.MathUtils.clamp((optics.age - 35) / 40, 0, 1));
+  }
 });
 
 const initial = new URLSearchParams(location.search).get('mode');

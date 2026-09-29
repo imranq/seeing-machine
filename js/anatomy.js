@@ -281,6 +281,18 @@ function scleraCanvas() {
 }
 
 let TEX = null;
+let TOON_RAMP = null;
+export function toonRamp() {
+  if (TOON_RAMP) return TOON_RAMP;
+  // Four deliberate light bands give the anatomy a printed, cel-shaded finish.
+  const data = new Uint8Array([34, 78, 142, 224]);
+  TOON_RAMP = new THREE.DataTexture(data, 4, 1, THREE.RedFormat);
+  TOON_RAMP.minFilter = THREE.NearestFilter;
+  TOON_RAMP.magFilter = THREE.NearestFilter;
+  TOON_RAMP.generateMipmaps = false;
+  TOON_RAMP.needsUpdate = true;
+  return TOON_RAMP;
+}
 export function textures() {
   if (TEX) return TEX;
   const mk = (canvas) => {
@@ -304,13 +316,13 @@ export class Eye {
     this.params = { cut: 0, accom: 0, pupil: 3.4, axial: 24, lensTint: 0 };
     const T = textures();
     this.mat = {
-      sclera: new THREE.MeshPhysicalMaterial({ color: 0xd9d2c8, map: T.sclera, roughness: 0.5, clearcoat: 0.35, clearcoatRoughness: 0.3, envMapIntensity: 0.55, sheen: 0.2, sheenColor: new THREE.Color('#ffb4a0'), side: THREE.DoubleSide }),
-      choroid: new THREE.MeshStandardMaterial({ color: 0x3b0d0b, roughness: 0.8, side: THREE.DoubleSide }),
-      retina: new THREE.MeshStandardMaterial({ map: T.fundus, emissiveMap: T.fundus, emissive: 0xffffff, emissiveIntensity: 0.28, roughness: 0.6, side: THREE.DoubleSide }),
+      sclera: new THREE.MeshToonMaterial({ color: 0xd9d2c8, map: T.sclera, gradientMap: toonRamp(), side: THREE.DoubleSide }),
+      choroid: new THREE.MeshToonMaterial({ color: 0x3b0d0b, gradientMap: toonRamp(), side: THREE.DoubleSide }),
+      retina: new THREE.MeshToonMaterial({ map: T.fundus, emissiveMap: T.fundus, emissive: 0xffffff, emissiveIntensity: 0.22, gradientMap: toonRamp(), side: THREE.DoubleSide }),
       cornea: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, transmission: 1, thickness: 0.55, ior: 1.376, transparent: true, opacity: 1, clearcoat: 1, side: THREE.DoubleSide, envMapIntensity: 1.4 }),
-      iris: new THREE.MeshStandardMaterial({ map: T.iris, roughness: 0.75, side: THREE.DoubleSide }),
+      iris: new THREE.MeshToonMaterial({ map: T.iris, gradientMap: toonRamp(), side: THREE.DoubleSide }),
       lens: new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.05, transmission: 1, thickness: 3.6, ior: 1.42, attenuationColor: new THREE.Color('#fff2c8'), attenuationDistance: 30, transparent: true, side: THREE.DoubleSide }),
-      ciliary: new THREE.MeshStandardMaterial({ color: 0x4a2418, roughness: 0.7, side: THREE.DoubleSide }),
+      ciliary: new THREE.MeshToonMaterial({ color: 0x4a2418, gradientMap: toonRamp(), side: THREE.DoubleSide }),
       zonule: new THREE.LineBasicMaterial({ color: 0xd9c8b0, transparent: true, opacity: 0.35 }),
     };
     this.meshes = {};
@@ -430,7 +442,16 @@ export function ghostMaterial(color, alpha = 0.12, power = 2.2) {
     fragmentShader: /* glsl */ `
       uniform vec3 uColor; uniform float uAlpha; uniform float uPow;
       varying vec3 vN; varying vec3 vV;
-      void main(){ float f = pow(1.0-abs(dot(normalize(vN),normalize(vV))), uPow); gl_FragColor = vec4(uColor*(0.35+f), uAlpha*(0.15+f)); }`,
+      void main(){
+        float facing = abs(dot(normalize(vN), normalize(vV)));
+        float rim = pow(1.0 - facing, uPow);
+        float band = floor(rim * 4.0) / 3.0;
+        float contour = 1.0 - smoothstep(0.025, 0.07, abs(fract(facing * 10.0) - 0.5));
+        float inkEdge = 1.0 - smoothstep(0.52, 0.68, rim);
+        vec3 ink = mix(uColor * (0.22 + band * 0.7), uColor * 1.25, contour * 0.18);
+        ink *= mix(0.38, 1.0, inkEdge);
+        gl_FragColor = vec4(ink, uAlpha * (0.12 + band * 0.62));
+      }`,
     transparent: true,
     depthWrite: false,
     side: THREE.DoubleSide,

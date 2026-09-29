@@ -6,10 +6,10 @@
   <title>The Seeing Machine</title>
   <meta name="description" content="An anatomically scaled 3D eye: trace light through the cornea and lens, drive the six eye muscles, and follow a million axons from retina to visual cortex." />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-  <meta name="theme-color" content="#07090c" />
+  <meta name="theme-color" content="#09110f" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,300..900&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap" />
   <link rel="stylesheet" href="style.css" />
   <script type="importmap">
     {
@@ -61,12 +61,42 @@
         <input type="range" id="age" min="8" max="75" value="25" /></label>
       <label class="ctl"><span class="row"><span class="cap">Axial length</span><output id="axialOut"></output></span>
         <input type="range" id="axial" min="2150" max="2750" value="2400" /></label>
-      <label class="ctl"><span class="row"><span class="cap">Pupil</span><output id="pupilOut"></output></span>
+      <label class="ctl"><span class="row"><span class="cap">Dark-adapted pupil</span><output id="pupilOut"></output></span>
         <input type="range" id="pupil" min="20" max="80" value="40" /></label>
       <div class="toggles">
         <label class="tog"><input type="checkbox" id="spec" /><span>Prescribe glasses</span></label>
         <label class="tog"><input type="checkbox" id="offaxis" checked /><span>Off-axis point</span></label>
       </div>
+      <div class="pupil-lab">
+        <div class="row"><span class="cap">Pupil reflex lab</span><span class="val" id="pupilStateOut">Bilateral response</span></div>
+        <p class="lab-intro">Shine light in one eye. The healthy reflex constricts <b>both</b> pupils.</p>
+        <p class="lab-circuit"><b>CN II</b> → pretectal area → both Edinger–Westphal nuclei → <b>CN III</b> → iris sphincter</p>
+        <div class="seg" id="lightEyeSeg" aria-label="Eye receiving light">
+          <button type="button" data-eye="-1" class="on">Light in right</button>
+          <button type="button" data-eye="1">Light in left</button>
+        </div>
+        <label class="ctl"><span class="row"><span class="cap">Light intensity</span><output id="lightOut">45%</output></span>
+          <input type="range" id="lightLevel" min="0" max="100" value="45" /></label>
+        <label class="ctl"><span class="row"><span class="cap">Pathway finding</span></span>
+          <select id="pupilDefect" class="lab-select">
+            <option value="none">Intact reflex</option>
+            <option value="r-aff">Right afferent defect · CN II</option>
+            <option value="l-aff">Left afferent defect · CN II</option>
+            <option value="r-eff">Right efferent defect · CN III</option>
+            <option value="l-eff">Left efferent defect · CN III</option>
+          </select>
+        </label>
+        <div class="pupil-readings" aria-label="Simulated pupil diameters">
+          <span class="r">RIGHT <b id="pupilRightOut">4.0 mm</b></span>
+          <span class="l">LEFT <b id="pupilLeftOut">4.0 mm</b></span>
+        </div>
+        <p class="foot" id="pupilNote" aria-live="polite"></p>
+      </div>
+      <details class="learn-card" open>
+        <summary><span class="learn-kicker">Field note 01</span><span class="learn-title">How focusing really works</span></summary>
+        <p>The <b>cornea</b> supplies most of the eye’s fixed focusing power. For near work, the ciliary muscle relaxes its pull on the lens capsule; the lens rounds up and adds power. This is <b>accommodation</b>.</p>
+        <div class="try-this"><span>TRY IT</span> Move the object from far to near. Watch the lens thicken and the accommodation readout rise.</div>
+      </details>
     </section>
 
     <section class="panel inset" data-pane="optics">
@@ -97,6 +127,11 @@
           <button data-side="1" data-n="III">III</button><button data-side="1" data-n="IV">IV</button><button data-side="1" data-n="VI">VI</button></div>
       </div>
       <table class="mtab" id="mtab"></table>
+      <details class="learn-card" open>
+        <summary><span class="learn-kicker">Field note 02</span><span class="learn-title">A muscle is a vector, not a label</span></summary>
+        <p>Each extraocular muscle has a <b>primary action</b>, but its pull changes with gaze. The superior and inferior recti also adduct; the obliques help rotate the eye. Cranial nerves III, IV and VI distribute the motor commands.</p>
+        <div class="try-this"><span>TRY IT</span> Choose H-test, then toggle a nerve palsy. Compare the two gaze traces and the red-glass double image.</div>
+      </details>
     </section>
 
     <section class="panel inset" data-pane="motor" hidden>
@@ -125,6 +160,11 @@
         <button class="btn" id="placeBtn">Place your own lesion</button>
         <label class="mini">r <input type="range" id="lesR" min="10" max="80" value="30" /> <output id="lesROut">3 mm</output></label>
       </div>
+      <details class="learn-card" open>
+        <summary><span class="learn-kicker">Field note 03</span><span class="learn-title">The crossing explains the field loss</span></summary>
+        <p>At the <b>optic chiasm</b>, fibres from the nasal half of each retina cross. Each optic tract therefore carries the opposite visual hemifield from both eyes. In the cortex, <b>V1</b> maps that input along the calcarine sulcus, with central vision taking up more cortical area.</p>
+        <div class="try-this"><span>TRY IT</span> Select a chiasm lesion, then move the probe on either field chart. Follow the matching pathways that remain lit.</div>
+      </details>
     </section>
 
     <section class="panel inset" data-pane="wiring" hidden>

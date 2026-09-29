@@ -12,7 +12,7 @@
 // Lesions are spheres in space (or a patch of V1). Whatever fibres pass through them are cut,
 // and the visual-field charts are computed from which fibres survive — nothing is hard-coded.
 import * as THREE from 'three';
-import { G, DISC, RIGHT, LEFT, SIDES, eyeCenter, retinaLocal, mulberry } from './anatomy.js';
+import { G, DISC, RIGHT, LEFT, SIDES, eyeCenter, retinaLocal, mulberry, toonRamp } from './anatomy.js';
 
 const DEG = Math.PI / 180;
 export const SPEED = 150; // mm/s — displayed conduction, slowed ~100× so you can follow it
@@ -434,7 +434,7 @@ export class Pathway {
         const geo = new THREE.TorusGeometry(lgnRadius(layer), 0.26, 8, 40, arc);
         geo.rotateZ((Math.PI - arc) / 2);
         const magno = layer <= 2;
-        const mat = new THREE.MeshStandardMaterial({ color: magno ? 0x8a93ff : 0xd7b7ff, emissive: magno ? 0x5560ff : 0xb07cff, emissiveIntensity: 0.15, roughness: 0.5, transparent: true, opacity: 0.85 });
+        const mat = new THREE.MeshToonMaterial({ color: magno ? 0x8a93ff : 0xd7b7ff, emissive: magno ? 0x303b98 : 0x7549a0, emissiveIntensity: 0.14, gradientMap: toonRamp(), transparent: true, opacity: 0.9 });
         const m = new THREE.Mesh(geo, mat);
         m.position.copy(LGN_C(h)).add(new THREE.Vector3(0, -1.5, 0));
         m.scale.z = 3.5;
